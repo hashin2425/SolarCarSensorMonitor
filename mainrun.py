@@ -27,16 +27,15 @@ def generate_dummy_data(dic):
 
 def receive_send_data():
     global is_continue_receive_send_data, latest_data_dict
+    filename =f"store/indicators_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    with open(filename, mode="a", encoding="UTF-8") as file:
+        file.write("datetime,"+",".join(latest_data_dict.keys()) + "\n")
     while is_continue_receive_send_data:
-        filename =f"store/indicators_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        latest_data_dict = generate_dummy_data(latest_data_dict)  # 一時的にデータを生成する
+        eel.Data_PY2JS(latest_data_dict) # type: ignore
         with open(filename, mode="a", encoding="UTF-8") as file:
-            file.write("datetime,"+",".join(latest_data_dict.keys()) + "\n")
-        while True:
-            latest_data_dict = generate_dummy_data(latest_data_dict)  # 一時的にデータを生成する
-            eel.Data_PY2JS(latest_data_dict) # type: ignore
-            with open(filename, mode="a", encoding="UTF-8") as file:
-                file.write(str(dt.now())+",".join([str(num) for num in latest_data_dict.values()]) + "\n")
-            eel.sleep(random.random() / 5)
+            file.write(str(dt.now())+",".join([str(num) for num in latest_data_dict.values()]) + "\n")
+        eel.sleep(random.random() / 5)
 
 
 
@@ -61,16 +60,18 @@ if __name__ == "__main__":
     # あらかじめinterfaceフォルダの親ディレクトリに移動してから実行する（でないとエラーになる）
     # interfaceフォルダにhtmlやcssを入れる
     eel.init("interface")
-    #thread = Thread(target=receive_send_data)
-    #thread.start()
+    thread = Thread(target=receive_send_data)
+    thread.start()
     start_window()
-    while False:
+    while True:
+        eel.sleep(0.1)
         if is_window_shown == False:
             input_character = input("ダッシュボードを閉じましたが、システムは稼働しています。\nシステム(Python)を終了する -> c\nもう一度ダッシュボードを開く -> o\n")
             if input_character == "c":
-                if thread.is_alive():
-                    is_continue_receive_send_data = False
-                else:
-                    sys.exit()
+                while True:
+                    if thread.is_alive():
+                        is_continue_receive_send_data = False
+                    else:
+                        sys.exit()
             elif input_character == "o":
                 start_window()
