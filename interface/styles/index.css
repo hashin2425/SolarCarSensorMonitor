@@ -1,0 +1,80 @@
+html {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+html body {
+  margin: 0;
+}
+html body div#header {
+  background-color: gray;
+  color: white;
+}
+html body div#header div#header_on_shown {
+  display: flex;
+  align-items: center;
+}
+html body div#header div#header_on_shown div.header_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+html body div#header div#header_on_shown div.header_buttons div.header_button {
+  margin: 5pt;
+}
+html body div#header div#header_on_shown div.header_buttons div.header_button:hover {
+  border-bottom: 2px solid white;
+}
+html body div#header div#header_on_shown div.header_buttons div.header_button:not(:hover) {
+  padding-bottom: 2px;
+}
+html body div#main {
+  display: flex;
+}
+html body div#main div#indicators {
+  width: 20%;
+}
+html body div#main div#graphs {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+html body div#main div#graphs div.container {
+  width: 33%;
+}
+html body div#main div.labels span.name {
+  font-size: 15pt;
+  color: black;
+}
+html body div#main div.labels span.value {
+  font-size: 20pt;
+  color: blue;
+}
+html body div#main div.labels span.unit {
+  font-size: 10pt;
+  color: black;
+}
+html body div#main div.indicator {
+  margin-top: 3pt;
+}
+html body div#main div.indicator.danger {
+  animation: alert 0.65s ease-in-out infinite;
+}
+html body div#main div.indicator.safe {
+  background-color: #E4DCCF;
+}
+
+canvas {
+  width: 100pt;
+  height: 100pt;
+}
+
+@keyframes alert {
+  0% {
+    background-color: palevioletred;
+  }
+  100% {
+    background-color: #E4DCCF;
+  }
+}/*# sourceMappingURL=index.css.map */

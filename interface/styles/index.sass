@@ -1,0 +1,62 @@
+$color0: #F0EBE3
+$color1: #E4DCCF
+$color2: #7D9D9C
+$color3: #576F72
+
+html
+    user-select: none
+    body
+        margin: 0
+        div#header
+            background-color: gray
+            color: white
+            div#header_on_shown
+                display: flex
+                align-items: center
+                div.header_buttons
+                    display: flex
+                    flex-wrap: wrap
+                    align-items: center
+                    div.header_button
+                        margin: 5pt
+                        &:hover
+                            border-bottom: 2px solid white
+                        &:not(:hover)
+                            padding-bottom: 2px
+        div#main
+            display: flex
+            div#indicators
+                width: 20%
+            div#graphs
+                width: 80%
+                display: flex
+                flex-direction: row
+                flex-wrap: wrap
+                div.container
+                    width: 33%
+            div.labels
+                span.name
+                    font-size: 15pt
+                    color: black
+                span.value
+                    font-size: 20pt
+                    color: blue
+                span.unit
+                    font-size: 10pt
+                    color: black
+            div.indicator
+                margin-top: 3pt
+                &.danger
+                    animation: alert 0.65s ease-in-out infinite
+                &.safe
+                    background-color: $color1
+
+canvas
+    width: 100pt
+    height: 100pt
+
+@keyframes alert
+    0%
+        background-color: palevioletred
+    100%
+        background-color: $color1

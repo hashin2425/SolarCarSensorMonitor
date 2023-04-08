@@ -1,0 +1,2 @@
+& c:/Users/Haya/OneDrive/dev/py/SolarCarSensorMonitor/.venv/Scripts/Activate.ps1
+& c:/Users/Haya/OneDrive/dev/py/SolarCarSensorMonitor/.venv/Scripts/python.exe c:/Users/Haya/OneDrive/dev/py/SolarCarSensorMonitor/mainrun.py 

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="jp">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="icon" href="favicon.ico" />
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="scripts/ChartV3.js"></script>
+    <script type="text/javascript" src="scripts/index.js"></script>
+    <link rel="stylesheet" href="styles/index.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="header_on_hidden" onclick="header_hide()" style="display: none; font-size: 10pt">ここをクリックしてメニューを開く</div>
+      <div id="header_on_shown">
+        <div style="font-size: 20pt; padding: 0 10pt">Menu</div>
+        <div class="header_buttons">
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="">Button</div>
+          <div class="header_button" onclick="header_show()">メニューを閉じる</div>
+        </div>
+      </div>
+    </div>
+    <div id="main">
+      <div id="graphs">
+        <!-- ここにグラフ一覧を生成 -->
+      </div>
+      <div id="indicators">
+        <!-- ここに指標一覧を生成 -->
+      </div>
+    </div>
+    <div id="footer"></div>
+  </body>
+</html>
