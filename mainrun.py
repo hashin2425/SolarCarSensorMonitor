@@ -1,5 +1,9 @@
-import eel  # https://pypi.org/project/Eel/
+import eel
+# https://pypi.org/project/Eel/
+# https://qiita.com/inoory/items/f431c581332c8d500a3b
+# pip install Eel
 
+import os
 import sys
 import random
 from math import sin
@@ -60,6 +64,10 @@ def start_window():
 
 
 if __name__ == "__main__":
+    # CSVファイルの保存先ディレクトリを生成
+    if not os.path.exists("store"):
+        os.mkdir("store")
+
     # あらかじめinterfaceフォルダの親ディレクトリに移動してから実行する（でないとエラーになる）
     # interfaceフォルダにhtmlやcssを入れる
     eel.init("interface")
