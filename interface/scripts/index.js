@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ],
       },
       options: {
+        pointRadius: 0,
         animation: {
           duration: 0,
         },
