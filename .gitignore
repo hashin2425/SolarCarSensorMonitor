@@ -134,3 +134,7 @@ dmypy.json
 # Accessories
 *.lnk
 *.ignore.*
+
+# Antecendence Setting
+# グローバル設定とは別に、特定環境のみで設定を変更するときに以下のJSONを利用する。
+settings.env.json

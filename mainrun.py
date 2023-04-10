@@ -3,6 +3,8 @@ import eel
 # https://qiita.com/inoory/items/f431c581332c8d500a3b
 # pip install Eel
 
+import json
+import re
 import os
 import sys
 import random
@@ -11,18 +13,11 @@ from time import sleep, time
 from datetime import datetime as dt
 from threading import Thread
 
-latest_data_dict = {
-    "battery_v": 10,
-    "battery_a": 10,
-    "battery_temp": 10,
-    "body_temp": 10,
-    "speed": 10,
-    "accelerator": 10,
-    "break": 10,
-}
-
+latest_data_dict = dict() # 最新のデータのみを格納する
 is_window_shown = False
 is_continue_receive_send_data = True
+path_settings = "./settings/settings.json"
+path_antecedence_settings = "./settings/settings.env.json"
 
 
 def generate_dummy_data(dic):
@@ -61,6 +56,16 @@ def start_window():
         close_callback=after_closed_window,
         block=False
     )
+    eel.Get_Initial_Settings(settings) # type: ignore
+
+
+def load_JsonWithComment(path):
+    with open(path, mode="r", encoding="UTF-8") as file:
+        raw_text = file.read()
+    text_comments_removed = re.sub(r'/\*[\s\S]*?\*/|//.*', '', raw_text)
+    setting = json.loads(text_comments_removed)
+    return setting
+
 
 
 if __name__ == "__main__":
@@ -71,9 +76,22 @@ if __name__ == "__main__":
     # あらかじめinterfaceフォルダの親ディレクトリに移動してから実行する（でないとエラーになる）
     # interfaceフォルダにhtmlやcssを入れる
     eel.init("interface")
+
+    # load setting.json
+    settings = load_JsonWithComment(path_settings)
+    for k in settings["data_list"].keys():
+        latest_data_dict[k] = 0  # 初期化
+
+    # load settings.env.json
+    if os.path.exists(path_antecedence_settings):
+        antecedence_setting = load_JsonWithComment(path_antecedence_settings)
+        settings.update(antecedence_setting)
+
     thread = Thread(target=receive_send_data)
     thread.start()
     start_window()
+
+    # ウィンドウ終了時にロギングを継続し、プログラムを終了するか尋ねる
     while True:
         eel.sleep(0.1)  # waitさせないとページにアクセスできない
         if is_window_shown == False:

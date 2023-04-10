@@ -1,69 +1,31 @@
-dataset_list = {
-  battery_v: {
-    display_name: "バッテリー電圧",
-    unit: "V",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-  battery_a: {
-    display_name: "バッテリー残量",
-    unit: "A",
-    data: [],
-    safe_range_min: 0,
-    safe_range_max: 2,
-    chart_obj: undefined,
-  },
-  battery_temp: {
-    display_name: "バッテリー温度",
-    unit: "℃",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-  body_temp: {
-    display_name: "機体温度",
-    unit: "℃",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-  speed: {
-    display_name: "速度",
-    unit: "km/h",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-  accelerator: {
-    display_name: "アクセル",
-    unit: "%",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-  break: {
-    display_name: "ブレーキ",
-    unit: "%",
-    data: [],
-    safe_range_min: -10000,
-    safe_range_max: 10000,
-    chart_obj: undefined,
-  },
-};
-
-max_length_graph = 60;
+dataset_list = {};
+general_settings = {};
+is_received_initial_settings = false;
+unix_before_graph_updated = new Date().getTime();
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded and parsed");
+
   // Prevent page reload
   window.addEventListener("beforeunload", function (e) {
     e.preventDefault();
-    e.returnValue = "本当に閉じますか？";
+    e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
+  });
+});
+
+// Receive data from python (initialize)
+eel.expose(Get_Initial_Settings);
+function Get_Initial_Settings(provided_setting_dict) {
+  console.log("Initialize start");
+
+  Object.keys(provided_setting_dict).forEach(function (id) {
+    general_settings[id] = provided_setting_dict[id];
+  });
+  // Initialize dataset_list
+  Object.keys(general_settings.data_list).forEach(function (id) {
+    dataset_list[id] = general_settings.data_list[id];
+    dataset_list[id]["chart_obj"] = undefined;
+    dataset_list[id]["data"] = [];
   });
 
   // Insert elements in container
@@ -98,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
     dataset_list[id].chart_obj = new Chart(this_canvas, {
       type: "line",
       data: {
-        labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        labels: [],
         datasets: [
           {
             label: "Value",
@@ -121,33 +83,52 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         scales: {
           x: {
-            min: 0,
-            max: 100,
+            // min: 0,
+            // max: general_settings.interface.graph_max_display,
             display: true,
           },
           y: {
+            // min: 0,
+            // max: 100,
             display: true,
           },
         },
       },
     });
   });
-});
 
-// Receive data from python
+  console.log("Initialize done");
+  is_received_initial_settings = true;
+}
+
+// Receive data from python (update data)
 eel.expose(Data_PY2JS);
 function Data_PY2JS(data) {
+  if (!is_received_initial_settings) {
+    return;
+  }
+
+  // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
+  let is_do_update_graph = false;
+  if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
+    is_do_update_graph = true;
+    unix_before_graph_updated = new Date().getTime();
+  }
+
   Object.keys(data).forEach(function (id) {
     if (Object.keys(dataset_list).includes(id)) {
       let new_data = data[id];
       dataset_list[id].data.push(new_data);
       dataset_list[id].chart_obj.data.labels.push("");
 
-      if (dataset_list[id].data.length > max_length_graph) {
+      if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
         dataset_list[id].data.shift();
         dataset_list[id].chart_obj.data.labels.shift();
       }
-      dataset_list[id].chart_obj.update();
+
+      if (is_do_update_graph) {
+        dataset_list[id].chart_obj.update();
+      }
 
       Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
         element.innerHTML = new_data;
