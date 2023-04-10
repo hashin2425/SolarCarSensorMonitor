@@ -1,7 +1,7 @@
-dataset_list = {};
-general_settings = {};
-is_received_initial_settings = false;
-unix_before_graph_updated = new Date().getTime();
+let dataset_list = {};
+let general_settings = {};
+let is_received_initial_settings = false;
+let unix_before_graph_updated = new Date().getTime();
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded and parsed");
