@@ -57,6 +57,25 @@ KeyError: 'value'
 - JavaScript において例外が発生している。Python 側では、例外でなく Warning として扱われる。
 - Python から実行する場合、JavaScript において発生した例外は不明確に表示される（発生箇所や例外の内容は知ることができない）ため、デバッグには根気が求められる。該当しそうな箇所に`return;`を挿入し、それをずらしながらエラーの発生箇所を特定しなければならない。
 
+### JavaScript 側の例外を詳細に分析する
+
+上記の通り、通常の方法では JS 側で発生した例外を詳細に確認することができない。しかし、コードを以下のように記述すれば Web の開発者ツールを経由して詳細を確認することができる。ややコードが複雑になるが、単純なシンタックスエラーであれば、すぐに特定できるだろう。
+
+```js:example
+function exp(){
+  try {
+    /*
+    すべての処理をこの中に含める（ここでエラーが発生する）
+    throw new Error();
+    */
+  } catch (e) {
+    console.log(e);
+  }
+}
+// Error: Something Error
+//     at <anonymous>:2:11
+```
+
 ## 設定について
 
 このシステムでは、インタフェースやデータ処理系での設定項目を Json ファイルによって行う。
@@ -66,4 +85,4 @@ KeyError: 'value'
 
 ### 設定項目
 
-`./interface/settings.json`のコメントを参照
+`./settings/settings.json`のコメントを参照
