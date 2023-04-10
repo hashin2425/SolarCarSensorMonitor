@@ -128,5 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Data sheets
 *.csv
+
+# Accessories
 *.lnk
+*.ignore.*
