@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Prevent page reload
     window.addEventListener("beforeunload", function (e) {
-      e.preventDefault();
-      e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
+      // 開発時はコメントアウト
+      // e.preventDefault();
+      // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
   } catch (e) {
     show_error(e);
@@ -120,7 +121,7 @@ function Data_PY2JS(data) {
     if (!is_received_initial_settings) {
       return;
     }
-    throw new Error("Data_PY2JS is not implemented");
+
     // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
     let is_do_update_graph = false;
     if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
@@ -181,4 +182,19 @@ function header_show() {
   } catch (e) {
     show_error(e);
   }
+}
+
+function add_timestamp_insert(unix) {
+  const parent = document.getElementById("timestamp_insert");
+  try {
+    const new_html = `\
+    
+      `;
+  } catch (e) {
+    show_error(e);
+  }
+}
+
+function timestamp_onchange() {
+  console.log(document.getElementById("1").value);
 }
