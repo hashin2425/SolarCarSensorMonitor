@@ -2,6 +2,7 @@ let dataset_list = {};
 let general_settings = {};
 let is_received_initial_settings = false;
 let unix_before_graph_updated = new Date().getTime();
+let unix_before_data_updated = new Date().getTime();
 
 function show_error(e) {
   console.error(e);
@@ -118,6 +119,7 @@ function Get_Initial_Settings(provided_setting_dict) {
 eel.expose(Data_PY2JS);
 function Data_PY2JS(data) {
   try {
+    unix_before_data_updated = new Date().getTime();
     if (!is_received_initial_settings) {
       return;
     }
@@ -198,3 +200,15 @@ function add_timestamp_insert(unix) {
 function timestamp_onchange() {
   console.log(document.getElementById("1").value);
 }
+
+// Check connection with python every 0.4seconds
+setInterval(function () {
+  const timeout_ms = 3000;
+  console.log(new Date().getTime() - unix_before_data_updated);
+  if (new Date().getTime() - unix_before_data_updated > timeout_ms) {
+    document.getElementById("alert_timeout").setAttribute("style", "display: block;");
+    setTimeout(() => {
+      window.close();
+    }, 3000);
+  }
+});
