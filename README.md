@@ -86,3 +86,22 @@ function exp(){
 ### 設定項目
 
 `./settings/settings.json`のコメントを参照
+
+## プロファイリングする
+
+コードの最適化を行うにあたって、処理時間が長い箇所を特定する必要がある。その為に必要なプロファイリングの方法をいかに述べる。
+
+### cProfile を使う
+
+VScode 環境であれば、`Profile:Launch Main Window`を実行することでプロファイリングを有効にした状態で、実行することができる。
+
+以下のコマンドを実行すると、プロファイリング結果をブラウザで確認することができる。
+
+```sh
+.\.venv\Scripts\pip.exe install snakeviz
+.\.venv\Scripts\python.exe -m snakeviz .\profile.prof
+```
+
+### LineProfiler を使う
+
+PythonライブラリのLineProfilerを使う。直感的に処理時間を調べることができるものの、コードを改変しなければならない範囲が大きいため、注意が必要。

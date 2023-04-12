@@ -15,6 +15,20 @@
                 "--UseDummyData" // ダミーデータを使用。
             ],
             "justMyCode": true
+        },
+        {
+            "name": "Profile:Launch Main Window",
+            "type": "python",
+            "request": "launch",
+            "module": "cProfile",
+            "args": [
+                "-o",
+                "profile.prof", // プロファイルを出力する。
+                "mainrun.py",
+                "--DisableBackGroundLogging", // ログファイルの出力を停止。ウィンドウ終了時のロギングを停止。
+                "--UseDummyData" // ダミーデータを使用。
+            ],
+            "justMyCode": true
         }
     ]
 }
