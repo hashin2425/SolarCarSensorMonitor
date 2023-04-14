@@ -1,0 +1,19 @@
+{
+    "recommendations": [
+        // VS Code extensions おすすめ
+        // 全般
+        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode",
+        "michelemelluso.code-beautifier",
+        "naumovs.color-highlight",
+        "ms-ceintl.vscode-language-pack-ja",
+        // GUI関連
+        "glenn2223.live-sass",
+        "ritwickdey.liveserver",
+        "syler.sass-indented",
+        // 内部関連
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+        // その他
+    ]
+}
