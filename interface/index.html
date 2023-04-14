@@ -21,21 +21,6 @@
           <div class="header_button" onclick="">Button</div>
           <div class="header_button" onclick="">Button</div>
           <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
           <div class="header_button" onclick="header_show()">メニューを閉じる</div>
         </div>
       </div>
@@ -43,6 +28,11 @@
     <div id="main">
       <div id="graphs">
         <!-- ここにグラフ一覧を生成 -->
+      </div>
+      <div id="large_graphs" style="display: none">
+        <!-- ここにグラフと詳細情報を生成 -->
+        <div id="large_graphs_display_name"></div>
+        <div class="chart"><canvas id="large_graphs_chart_focus"></canvas></div>
       </div>
       <div id="indicators">
         <!-- ここに指標一覧を生成 -->

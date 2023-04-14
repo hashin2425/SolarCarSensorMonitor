@@ -2,9 +2,11 @@ html {
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  height: 100%;
 }
 html body {
   margin: 0;
+  height: 100%;
 }
 html body div#alert_timeout {
   display: none;
@@ -14,7 +16,7 @@ html body div#alert_timeout {
   font-size: 15pt;
 }
 html body div#header {
-  background-color: gray;
+  background-color: #222831;
   color: white;
 }
 html body div#header div#header_on_shown {
@@ -37,9 +39,12 @@ html body div#header div#header_on_shown div.header_buttons div.header_button:no
 }
 html body div#main {
   display: flex;
+  height: 90%;
 }
 html body div#main div#indicators {
   width: 20%;
+  background-color: #EEEEEE;
+  height: 100%;
 }
 html body div#main div#graphs {
   width: 80%;
@@ -49,6 +54,12 @@ html body div#main div#graphs {
 }
 html body div#main div#graphs div.container {
   width: 33%;
+  background-color: white;
+  height: -moz-min-content;
+  height: min-content;
+}
+html body div#main div#large_graphs {
+  width: 0em;
 }
 html body div#main div.labels span.name {
   font-size: 15pt;
@@ -56,23 +67,25 @@ html body div#main div.labels span.name {
 }
 html body div#main div.labels span.value {
   font-size: 20pt;
-  color: blue;
+  color: black;
 }
 html body div#main div.labels span.unit {
   font-size: 10pt;
   color: black;
 }
 html body div#main div.indicator {
-  margin-top: 3pt;
+  border-left: 3px solid transparent;
+  padding: 2px;
+  margin-top: 5pt;
 }
 html body div#main div.indicator.danger {
   animation: alert 0.65s ease-in-out infinite;
 }
 html body div#main div.indicator.safe {
-  background-color: #E4DCCF;
+  background-color: #EEEEEE;
 }
 html body div#footer {
-  background-color: gray;
+  background-color: #222831;
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -98,7 +111,7 @@ html body div#footer div#timestamp_insert div.timestamp input.ts_text {
 }
 html body div#footer div#timestamp_insert div.timestamp input.ts_submit {
   width: auto;
-  background-color: #576F72;
+  background-color: #00ADB5;
   font-size: 10pt;
   cursor: pointer;
   color: white;
@@ -107,7 +120,7 @@ html body div#footer div#timestamp_insert div.timestamp input.ts_submit:hover {
   border: 2px solid white;
 }
 html body div#footer div#timestamp_insert div.timestamp input.ts_submit:not(:hover) {
-  border: 2px solid #576F72;
+  border: 2px solid #00ADB5;
 }
 html body div#footer div#timestamp_insert div.timestamp input.ts_submit:active {
   transform: translateY(4px);
@@ -120,9 +133,9 @@ canvas {
 
 @keyframes alert {
   0% {
-    background-color: palevioletred;
+    background-color: rgba(255, 0, 0, 0.3);
   }
   100% {
-    background-color: #E4DCCF;
+    background-color: #EEEEEE;
   }
 }/*# sourceMappingURL=index.css.map */

@@ -3,6 +3,8 @@ let general_settings = {};
 let is_received_initial_settings = false;
 let unix_before_graph_updated = new Date().getTime();
 let unix_before_data_updated = new Date().getTime();
+let now_focus_graph_id = "all"; // "all" or value_id
+let large_chart_obj = undefined;
 
 function show_error(e) {
   console.error(e);
@@ -42,6 +44,14 @@ function Get_Initial_Settings(provided_setting_dict) {
     // Insert elements in container
     const containers = document.getElementById("graphs");
     const indicators = document.getElementById("indicators");
+
+    // 「すべてのグラフを表示する」ボタン挿入
+    indicators.innerHTML += `\
+      <div class="labels indicator indicator_all safe" onclick="focus_graph_to('all');" style="border-color: black;">\
+        <span class="name">すべてのグラフを表示する</span>\
+      </div>\
+      `;
+
     Object.keys(dataset_list).forEach(function (id) {
       containers.innerHTML += `\
       <div class="container container_${id}">\
@@ -56,7 +66,7 @@ function Get_Initial_Settings(provided_setting_dict) {
       </div>\
       `;
       indicators.innerHTML += `\
-      <div class="labels indicator indicator_${id}">\
+      <div class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
         <span class="name">${dataset_list[id].display_name}</span>\
         <br>\
         <span class="value value_${id}">1,234</span>\
@@ -76,6 +86,8 @@ function Get_Initial_Settings(provided_setting_dict) {
             {
               label: "Value",
               data: dataset_list[id].data,
+              fill: true,
+              backgroundColor: "rgba(255, 99, 132, 0.25)",
               borderWidth: 1,
               borderColor: "rgb(255, 99, 132)",
             },
@@ -125,10 +137,14 @@ function Data_PY2JS(data) {
     }
 
     // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
-    let is_do_update_graph = false;
+    let is_interval_update_graph = false;
     if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
-      is_do_update_graph = true;
+      is_interval_update_graph = true;
       unix_before_graph_updated = new Date().getTime();
+    }
+
+    if (now_focus_graph_id != "all") {
+      large_chart_obj.update();
     }
 
     Object.keys(data).forEach(function (id) {
@@ -142,13 +158,25 @@ function Data_PY2JS(data) {
           dataset_list[id].chart_obj.data.labels.shift();
         }
 
-        if (is_do_update_graph) {
+        var is_display_all_graphs = "all" == now_focus_graph_id;
+        if (is_display_all_graphs && is_interval_update_graph) {
           dataset_list[id].chart_obj.update();
         }
 
-        Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
-          element.innerHTML = new_data;
-        });
+        if (is_interval_update_graph) {
+          Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
+            var before_value = parseFloat(element.textContent);
+
+            // 値が変わったら色を変える
+            if (before_value > new_data) {
+              element.setAttribute("style", "background-color:rgba(255,0,0,0.075);");
+            } else if (before_value < new_data) {
+              element.setAttribute("style", "background-color:rgba(0,0,255,0.075);");
+            }
+
+            element.innerHTML = new_data.toLocaleString();
+          });
+        }
 
         Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
           if (dataset_list[id].safe_range_max < new_data) {
@@ -201,7 +229,6 @@ function timestamp_onchange() {
   console.log(document.getElementById("1").value);
 }
 
-// Check connection with python every 0.4seconds
 setInterval(function () {
   const timeout_ms = 3000;
   console.log(new Date().getTime() - unix_before_data_updated);
@@ -212,3 +239,76 @@ setInterval(function () {
     }, 3000);
   }
 });
+
+function focus_graph_to(id) {
+  if (id == now_focus_graph_id) {
+    return;
+  }
+
+  document.getElementsByClassName(`indicator_${id}`)[0].setAttribute("style", "border-color: black;");
+  document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].setAttribute("style", "border-color: transparent;");
+
+  let is_switch_all2large = !((id == "all" && now_focus_graph_id == "all") || (id != "all" && now_focus_graph_id != "all"));
+  if (is_switch_all2large) {
+    if (id == "all") {
+      // large_graphを非表示にして、グラフ一覧を表示する
+      document.getElementById("graphs").setAttribute("style", "display: flex;");
+      document.getElementById("large_graphs").setAttribute("style", "display: none;");
+    } else if (now_focus_graph_id == "all") {
+      // グラフ一覧を非表示にして、large_graphを表示する
+      document.getElementById("graphs").setAttribute("style", "display: none;");
+      document.getElementById("large_graphs").setAttribute("style", "display: block;  width: 80%;");
+    }
+  }
+
+  if (id != "all") {
+    // large_graphに情報を表示する
+    document.getElementById("large_graphs_display_name").textContent = general_settings.data_list[id].display_name;
+    if (large_chart_obj) {
+      large_chart_obj.destroy();
+    }
+    large_chart_obj = new Chart(document.getElementById("large_graphs_chart_focus").getContext("2d"), {
+      type: "line",
+      data: {
+        labels: dataset_list[id].chart_obj.data.labels,
+        datasets: [
+          {
+            label: "Value",
+            data: dataset_list[id].data,
+            fill: true,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            borderWidth: 1,
+            borderColor: "rgb(255, 99, 132)",
+          },
+        ],
+      },
+      options: {
+        pointRadius: 0,
+        animation: {
+          duration: 0,
+        },
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          x: {
+            // min: 0,
+            // max: general_settings.interface.graph_max_display,
+            display: true,
+          },
+          y: {
+            // min: 0,
+            // max: 100,
+            display: true,
+          },
+        },
+      },
+    });
+    large_chart_obj.update();
+  }
+
+  now_focus_graph_id = id;
+}
