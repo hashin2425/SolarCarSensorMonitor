@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%; margin: 0px">
+  <head style="height: 100%; margin: 0px">
+    <!--HTMLページの開発や調整を行うときはこのページを利用することで擬似的にホットリロードを行えます-->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[HotReload Enabled]Dashboard</title>
+  </head>
+  <body style="height: 100%; margin: 0px">
+    <iframe src="./index.html" frameborder="0" width="100%" height="100%" id="main_iframe"></iframe>
+    <script>
+      // ここでPythonのコードを擬似的に再現する（読み込み関連部のみで良い）
+      // Iframeでindex.htmlを呼び出し、このコードから操作を行う。
+      // LiveServerの利用を強く推奨する
+      const dummy_settings = {
+        interface: {
+          update_interval_sec: 0.03,
+          graph_max_display: 50,
+        },
+        data_list: {
+          dummy_0: {
+            display_name: "ダミー0",
+            unit: "V",
+            safe_range_min: -10000,
+            safe_range_max: 10000,
+          },
+          dummy_1: {
+            display_name: "ダミー1",
+            unit: "A",
+            safe_range_min: 999998,
+            safe_range_max: 999999,
+          },
+          dummy_2: {
+            display_name: "ダミー2",
+            unit: "km",
+            safe_range_min: -10000,
+            safe_range_max: 10000,
+          },
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", (event) => {
+        document.getElementById("main_iframe").onload = () => {
+          // 初期起動時の設定
+          document.getElementById("main_iframe").contentWindow.Get_Initial_Settings(dummy_settings);
+
+          // 定期動作時の処理
+          setInterval(() => {
+            let dummy_data = {};
+            Object.keys(dummy_settings.data_list).forEach((key) => {
+              dummy_data[key] = Math.round(Math.sin(new Date().getTime() / 150) * 10000);
+            });
+            document.getElementById("main_iframe").contentWindow.Data_PY2JS(dummy_data);
+          }, 30);
+        };
+      });
+    </script>
+  </body>
+</html>
