@@ -52,7 +52,7 @@ def start_window():
     is_window_shown = True
     eel.start(
         'index.html',
-        size=(1000, 600),
+        size=(1280, 720),
         mode='chrome',
         port=0,  # ポートを自動的に設定する
         host='localhost',
