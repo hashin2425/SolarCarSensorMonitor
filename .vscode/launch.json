@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Main Window",
+            "name": "Debug:Launch Main Window",
             "type": "python",
             "request": "launch",
             "program": "mainrun.py",
