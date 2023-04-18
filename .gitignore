@@ -142,3 +142,6 @@ settings.env.json
 # CSSはそれぞれ.sassから生成すること
 *.css
 *.css.map
+
+# profiling result
+*.prof
