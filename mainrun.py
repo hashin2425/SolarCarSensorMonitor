@@ -23,6 +23,7 @@ path_antecedence_settings = "./settings/settings.env.json"
 def generate_dummy_data(dic):
     for k in dic.keys():
         dic[k] += int((random.random() * 10) - 5)
+        dic[k] = max(0, dic[k])
     return dic
 
 
