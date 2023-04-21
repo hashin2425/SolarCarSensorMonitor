@@ -2,11 +2,14 @@ $color0: #eeeeee;
 $color1: #393e46;
 $color2: #222831;
 $color3: #00adb5;
+$color4: #cfcfcf;
 $col_values: #4313b4;
 $col_font_black: black;
 $col_font_white: white;
+$height_shown_header: 45px;
 
 html {
+  background-color: $color0;
   user-select: none;
   height: 100%;
   body {
@@ -20,21 +23,30 @@ html {
       font-size: 15pt;
     }
     div#header {
+      width: 100%;
+      top: 0;
+      position: fixed;
       background-color: $color2;
       color: $col_font_white;
       div#header_on_shown {
+				height: $height_header;
         display: flex;
         align-items: center;
-        div.header_buttons {
+        div#header_buttons {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
           div.header_button {
             margin: 5pt;
+            padding: 5px 5px 2px 5px;
             &:hover {
-              border-bottom: 2px solid white;
+              background-color: rgba(255, 255, 255, 0.25);
+              cursor: pointer;
             }
-            &:not(:hover) {
+            &.displayed {
+              border-bottom: 2px solid $color0;
+            }
+            &:not(.displayed) {
               padding-bottom: 2px;
             }
           }
@@ -42,93 +54,140 @@ html {
       }
     }
     div#main {
-      display: flex;
-      height: 90%; // 100%としたいが、フッターの高さを引いて指定する
-      div#indicators {
-        width: 20%;
-        background-color: $color0;
-        height: 100%;
-      }
-      div#graphs {
-        width: 80%;
+      margin-top: $height_header;
+      height: 100%;
+      div#main_graphs {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        div.container {
-          width: 33%;
-          background-color: white;
-          height: min-content;
+        height: 100%; // 100%としたいが、フッターの高さを引いて指定する
+        div#indicators {
+          width: 20%;
+          background-color: $color4;
+          height: 100%;
         }
-      }
-      div#large_graphs {
-        width: 0em; // 初回読み込み時は0にすることでdiv#graphsのwidthを定めさせる
-      }
-      div.labels {
-        span.name {
-          font-size: 15pt;
-          color: $col_font_black;
+        div#graphs {
+          width: 80%;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          div.container {
+            width: 33%;
+            background-color: $color0;
+            height: min-content;
+          }
         }
-        span.value {
-          font-size: 20pt;
-          color: $col_font_black;
+        div#large_graphs {
+          width: 0em; // 初回読み込み時は0にすることでdiv#graphsのwidthを定めさせる
         }
-        span.unit {
-          font-size: 10pt;
-          color: $col_font_black;
+        div.labels {
+          span.name {
+            font-size: 15pt;
+            color: $col_font_black;
+          }
+          span.value {
+            display: inline-block;
+            text-align: right;
+            justify-content: center;
+            min-width: 75pt;
+            height: 25pt;
+            font-size: 20pt;
+            color: $col_font_black;
+          }
+          span.unit {
+            font-size: 10pt;
+            color: $col_font_black;
+          }
         }
-      }
-      div.indicator {
-        border-left: 3px solid transparent;
-        padding: 2px;
-        margin-top: 5pt;
-        &.danger {
-          animation: alert 0.65s ease-in-out infinite;
+        div.indicator {
+          border-left: 3px solid transparent;
+          padding: 2px;
+          margin-top: 5pt;
+          &.danger {
+            animation: alert 0.65s ease-in-out infinite;
+          }
+          &.safe {
+            background-color: $color4;
+          }
         }
-        &.safe {
-          background-color: $color0;
-        }
-      }
-    }
-    div#footer {
-      background-color: $color2;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      div#timestamp_insert {
-        width: 100%;
-        div.timestamp {
+        div#timestamp_insert {
+          background-color: $color2;
+          position: fixed;
+          bottom: 0;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          input {
-            margin: 2pt;
-            border-radius: 4pt;
-            &.ts_text {
-              width: 100%;
-              border: none;
-            }
-            &.ts_submit {
-              width: auto;
-              background-color: $color3;
-              font-size: 10pt;
-              cursor: pointer;
-              color: $col_font_white;
-              &:hover {
-                border: 2px solid white;
+
+          width: 100%;
+          div.timestamp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            input {
+              margin: 2pt;
+              border-radius: 4pt;
+              &.ts_text {
+                width: 100%;
+                border: none;
               }
-              &:not(:hover) {
-                border: 2px solid $color3;
-              }
-              &:active {
-                transform: translateY(4px);
+              &.ts_submit {
+                width: auto;
+                background-color: $color3;
+                font-size: 10pt;
+                cursor: pointer;
+                color: $col_font_white;
+                &:hover {
+                  border: 2px solid white;
+                }
+                &:not(:hover) {
+                  border: 2px solid $color3;
+                }
+                &:active {
+                  transform: translateY(4px);
+                }
               }
             }
           }
         }
       }
+      div#main_connection_settings {
+        div#devices_container {
+          width: 30%;
+          min-width: min-content;
+          div#refresh_device_container {
+            margin: 5px;
+            padding: 5px;
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.25);
+            }
+            &:active {
+              transform: translateY(4px);
+            }
+          }
+          div#devices_list {
+            div.found_device {
+              &:hover {
+                background-color: rgba(0, 0, 0, 0.25);
+              }
+              div.name {
+                font-size: 15pt;
+              }
+              div.connection {
+                font-size: 10pt;
+              }
+            }
+          }
+        }
+        div#device_raw_view {
+          width: 70%;
+        }
+      }
+      div#main_display_settings {
+        width: 100%;
+      }
+    }
+    div#footer {
+      height: 0;
+      background-color: $color2;
     }
   }
 }
@@ -141,6 +200,6 @@ canvas {
     background-color: rgba(255, 0, 0, 0.3);
   }
   100% {
-    background-color: $color0;
+    background-color: $color4;
   }
 }

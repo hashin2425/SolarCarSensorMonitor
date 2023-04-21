@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // e.preventDefault();
       // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
+
+    document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
   } catch (e) {
     show_error(e);
   }
@@ -174,7 +176,7 @@ function Data_PY2JS(data) {
               element.setAttribute("style", "background-color:rgba(0,0,255,0.075);");
             }
 
-            element.innerHTML = new_data.toLocaleString();
+            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3桁ごとカンマ 小数点第2位まで表示
           });
         }
 
@@ -197,22 +199,49 @@ function Data_PY2JS(data) {
   }
 }
 
-function header_hide() {
+// Header
+function on_clicked_header_button(comment) {
   try {
-    document.getElementById("header_on_hidden").style.display = "none";
-    document.getElementById("header_on_shown").style.display = "flex";
-  } catch (e) {
+    function hide_container() {
+      var container = document.getElementById("main").children;
+      for (var i = 0; i < container.length; i++) {
+        container[i].style.display = "none";
+      }
+      var container = document.getElementById("header_buttons").children;
+      for (var i = 0; i < container.length; i++) {
+        container[i].classList.remove("displayed");
+      }
+    }
+    if ("bar_hide" == comment) {
+      document.getElementById("header_on_hidden").style.display = "flex";
+      document.getElementById("header_on_shown").style.display = "none";
+    }
+    if ("bar_show" == comment) {
+      document.getElementById("header_on_hidden").style.display = "none";
+      document.getElementById("header_on_shown").style.display = "flex";
+    }
+    if ("show_graphs" == comment) {
+      hide_container();
+      document.getElementById("header_show_graphs").classList.add("displayed");
+      document.getElementById("main_graphs").setAttribute("style", "display:flex;");
+    }
+    if ("show_connection" == comment) {
+      hide_container();
+      document.getElementById("header_show_connection").classList.add("displayed");
+      document.getElementById("main_connection_settings").setAttribute("style", "display:flex;");
+    }
+
+    if ("show_settings" == comment) {
+      hide_container();
+      document.getElementById("header_show_settings").classList.add("displayed");
+      document.getElementById("main_display_settings").setAttribute("style", "display:flex;");
+    }
+  } catch {
     show_error(e);
   }
 }
-function header_show() {
-  try {
-    document.getElementById("header_on_hidden").style.display = "flex";
-    document.getElementById("header_on_shown").style.display = "none";
-  } catch (e) {
-    show_error(e);
-  }
-}
+
+// Header end
 
 function add_timestamp_insert(unix) {
   const parent = document.getElementById("timestamp_insert");

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
-    <link rel="icon" href="favicon.ico" />
+    <link rel="icon" href="icon.png" />
     <script type="text/javascript" src="/eel.js"></script>
     <script type="text/javascript" src="scripts/ChartV3.js"></script>
     <script type="text/javascript" src="scripts/index.js"></script>
@@ -14,38 +14,56 @@
   <body>
     <div style="display: none" id="alert_timeout">Pythonとの接続が切れました。3秒後にウィンドウを終了します。</div>
     <div id="header">
-      <div id="header_on_hidden" onclick="header_hide()" style="display: none; font-size: 10pt">ここをクリックしてメニューを開く</div>
+      <div id="header_on_hidden" onclick="on_clicked_header_button('bar_show')" style="display: none; font-size: 10pt">ここをクリックしてメニューを開く</div>
       <div id="header_on_shown">
-        <div style="font-size: 20pt; padding: 0 10pt">Menu</div>
-        <div class="header_buttons">
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="">Button</div>
-          <div class="header_button" onclick="header_show()">メニューを閉じる</div>
+        <div style="font-size: 20pt; padding: 0 10pt">Dashboard</div>
+        <div id="header_buttons">
+          <div id="header_show_graphs" class="header_button" onclick="on_clicked_header_button('show_graphs')">グラフ画面</div>
+          <div id="header_show_connection" class="header_button" onclick="on_clicked_header_button('show_connection')">接続設定</div>
+          <div id="header_show_settings" class="header_button" onclick="on_clicked_header_button('show_settings')">表示設定</div>
+          <div id="header_bar_hide" class="header_button" onclick="on_clicked_header_button('bar_hide')">メニューを閉じる</div>
         </div>
       </div>
     </div>
     <div id="main">
-      <div id="graphs">
-        <!-- ここにグラフ一覧を生成 -->
-      </div>
-      <div id="large_graphs" style="display: none">
-        <!-- ここにグラフと詳細情報を生成 -->
-        <div id="large_graphs_display_name"></div>
-        <div class="chart"><canvas id="large_graphs_chart_focus"></canvas></div>
-      </div>
-      <div id="indicators">
-        <!-- ここに指標一覧を生成 -->
-      </div>
-    </div>
-    <div id="footer">
-      <div id="timestamp_insert">
-        <div class="timestamp">
-          <input class="ts_text" type="text" id="1" oninput="timestamp_onchange()" />
-          <input class="ts_submit" type="button" value="入力開始時の時刻で挿入" onclick="" />
-          <input class="ts_submit" type="button" value="現在時刻で挿入" onclick="" />
+      <div id="main_graphs" style="display: none">
+        <div id="graphs">
+          <!-- ここにグラフ一覧を生成 -->
+        </div>
+        <div id="large_graphs" style="display: none">
+          <!-- ここにグラフと詳細情報を生成 -->
+          <div id="large_graphs_display_name"></div>
+          <div class="chart"><canvas id="large_graphs_chart_focus"></canvas></div>
+        </div>
+        <div id="indicators">
+          <!-- ここに指標一覧を生成 -->
+        </div>
+        <div id="timestamp_insert">
+          <div class="timestamp">
+            <input class="ts_text" type="text" id="1" oninput="timestamp_onchange()" />
+            <input class="ts_submit" type="button" value="入力開始時の時刻で挿入" onclick="" />
+            <input class="ts_submit" type="button" value="現在時刻で挿入" onclick="" />
+          </div>
         </div>
       </div>
+      <div id="main_connection_settings" style="display: none">
+        <div id="devices_container">
+          <div id="refresh_device_container">デバイス一覧を更新する</div>
+          <div id="devices_list">
+            <div class="found_device">
+              <div class="name">Device1</div>
+              <div class="connection">Bluetooth 000000000000</div>
+            </div>
+            <div class="found_device">
+              <div class="name">Device1</div>
+              <div class="connection">Bluetooth 000000000000</div>
+            </div>
+          </div>
+        </div>
+        <div id="device_raw_view">a</div>
+      </div>
+      <div id="main_display_settings" style="display: none"></div>
     </div>
+    <div id="footer"></div>
   </body>
 </html>
