@@ -215,10 +215,12 @@ function on_clicked_header_button(comment) {
     if ("bar_hide" == comment) {
       document.getElementById("header_on_hidden").style.display = "flex";
       document.getElementById("header_on_shown").style.display = "none";
+      document.getElementById("main").setAttribute("style", "margin-top:20px;");
     }
     if ("bar_show" == comment) {
       document.getElementById("header_on_hidden").style.display = "none";
       document.getElementById("header_on_shown").style.display = "flex";
+      document.getElementById("main").setAttribute("style", "margin-top:45px;");
     }
     if ("show_graphs" == comment) {
       hide_container();

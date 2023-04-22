@@ -29,7 +29,7 @@ html {
       background-color: $color2;
       color: $col_font_white;
       div#header_on_shown {
-				height: $height_header;
+        height: $height_shown_header;
         display: flex;
         align-items: center;
         div#header_buttons {
@@ -52,9 +52,19 @@ html {
           }
         }
       }
+      div#header_on_hidden {
+        &:hover {
+          text-align: center;
+          height: $height_shown_header;
+          font-size: 20pt;
+        }
+        &:not(:hover) {
+          font-size: 10pt;
+        }
+      }
     }
     div#main {
-      margin-top: $height_header;
+      margin-top: $height_shown_header;
       height: 100%;
       div#main_graphs {
         display: flex;
