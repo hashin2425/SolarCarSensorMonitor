@@ -14,9 +14,12 @@
   <body>
     <div style="display: none" id="alert_timeout">Pythonとの接続が切れました。3秒後にウィンドウを終了します。</div>
     <div id="header">
-      <div id="header_on_hidden" onclick="on_clicked_header_button('bar_show')" style="display: none;">ここをクリックしてメニューを開く</div>
+      <div id="header_on_hidden" onclick="on_clicked_header_button('bar_show')" style="display: none">ここをクリックしてメニューを開く</div>
       <div id="header_on_shown">
-        <div style="font-size: 20pt; padding: 0 10pt">Dashboard</div>
+        <div id="menu_title">
+          <img src="./icon.png" alt="icon" height="25pt" />
+          <div>Dashboard</div>
+        </div>
         <div id="header_buttons">
           <div id="header_show_graphs" class="header_button" onclick="on_clicked_header_button('show_graphs')">グラフ画面</div>
           <div id="header_show_connection" class="header_button" onclick="on_clicked_header_button('show_connection')">接続設定</div>
