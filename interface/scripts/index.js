@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
 
-    document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
+    document.getElementById("header_show_settings").click(); // 起動時にデバイス接続設定の画面を表示
   } catch (e) {
     show_error(e);
   }
@@ -120,6 +120,30 @@ function Get_Initial_Settings(provided_setting_dict) {
           },
         },
       });
+    });
+
+    // Insert settings
+    const setting_tbody = document.getElementById("main_display_settings").getElementsByTagName("tbody")[0];
+    const changeable_settings_key = ["interface", "data_logging"];
+    changeable_settings_key.forEach(function (key) {
+      if (Object.keys(general_settings).includes(key)) {
+        Object.keys(general_settings[key]).forEach(function (id) {
+          var value_type = {
+            number: "number",
+            boolean: "checkbox",
+            string: "text",
+          }[typeof general_settings[key][id]];
+
+          setting_tbody.innerHTML += `\
+            <tr>\
+              <td>${key}.${id}</td>\
+              <td>Explain</td>\
+              <td>${general_settings[key][id]}</td>\
+              <td><input type="${value_type}" id="setting_${key}_${id}" value="${general_settings[key][id]}"/></td>\
+            </tr>\
+          `;
+        });
+      }
     });
 
     console.log("Initialize done");
