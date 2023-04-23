@@ -60,7 +60,10 @@
             <!-- ここに接続先リストを生成 -->
           </tbody>
         </table>
-        <div id="refresh_device_list" onclick="on_reset_connection_list_button_pushed();"><span>リストを更新する</span><span>（20秒程度かかります）</span></div>
+        <div class="container_footer">
+          <span class="message">ここで接続先デバイスを選ぶことができます。リストの更新は20秒程度かかります。</span>
+          <div class="button" id="refresh_device_list" onclick="on_reset_connection_list_button_pushed();">リストを更新する</div>
+        </div>
       </div>
       <div id="main_display_settings" style="display: none">
         <table>
@@ -76,7 +79,10 @@
             <!-- ここに設定項目を挿入 -->
           </tbody>
         </table>
-        <div id="submit_setting">変更を適応する</div>
+        <div class="container_footer">
+          <span class="message">ここで表示やデータ処理に関する設定を変更できます。</span>
+          <div class="button" id="submit_setting">変更を適応する</div>
+        </div>
       </div>
     </div>
     <div id="footer"></div>
