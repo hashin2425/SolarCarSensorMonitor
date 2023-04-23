@@ -34,6 +34,7 @@ device_list = dict()
 def get_device_list():
     global device_list
     device_list = dict()
+    eel.progress_manager("connection_list_update_started") # type:ignore
     # self.device_list = {
     # '00:00:00:00:00:00': {'name': 'AAA', 'type': 'bluetooth', 'response': 'None'},
     # 'COM1': {'name': 'BBB', 'type': 'serial', 'response': 'None'},
@@ -51,6 +52,8 @@ def get_device_list():
         temp = {"name":device[1], "type":"bluetooth", "response":"temporary treat as none"}
         eel.reload_connection_list({device[0]:temp}) # type:ignore
         device_list[device[0]] = temp
+
+    eel.progress_manager("connection_list_update_done") # type:ignore
 
     return device_list
 
@@ -97,6 +100,8 @@ def start_window():
     )
     eel.Get_Initial_Settings(settings) # type: ignore
 
+    update_connection_list_th = Thread(target=get_device_list)
+    update_connection_list_th.start()
 
 def load_JsonWithComment(path):
     with open(path, mode="r", encoding="UTF-8") as file:

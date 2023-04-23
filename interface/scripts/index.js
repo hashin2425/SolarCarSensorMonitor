@@ -1,6 +1,7 @@
 let dataset_list = {};
 let general_settings = {};
 let is_received_initial_settings = false;
+let is_now_updating_connection_list = false;
 let unix_before_graph_updated = new Date().getTime();
 let unix_before_data_updated = new Date().getTime();
 let now_focus_graph_id = "all"; // "all" or value_id
@@ -396,8 +397,10 @@ function reload_connection_list(connection_list, clear_all = false) {
   }
 }
 function on_reset_connection_list_button_pushed() {
-  reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
-  eel.get_device_list();
+  if (is_now_updating_connection_list == false) {
+    reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
+    eel.get_device_list();
+  }
 }
 
 function change_dark_mode() {
@@ -407,5 +410,36 @@ function change_dark_mode() {
   } else {
     document.getElementsByTagName("html")[0].classList.remove("light");
     document.getElementsByTagName("html")[0].classList.add("dark");
+  }
+}
+
+function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
+  if (is_clear) {
+    element.textContent = "";
+  }
+  let cursor = 0;
+  const interval = setInterval(() => {
+    element.textContent += text.charAt(cursor);
+    cursor++;
+    if (cursor === text.length) {
+      clearInterval(interval);
+    }
+  }, interval_ms);
+}
+
+eel.expose(progress_manager);
+function progress_manager(message) {
+  // Python側の関数を非同期で実行するとき、処理進捗を表示する
+  try {
+    if (message == "connection_list_update_started") {
+      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストをリセットしています。Bluetoothデバイスの検知には時間がかかります。しばらくお待ちください。", true);
+      is_now_updating_connection_list = true;
+    }
+    if (message == "connection_list_update_done") {
+      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストの更新が終わりました。ここで接続先デバイスを選ぶことができます。リストの更新には20秒程度かかります。", true);
+      is_now_updating_connection_list = false;
+    }
+  } catch {
+    show_error(e);
   }
 }

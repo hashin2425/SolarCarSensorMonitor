@@ -324,6 +324,7 @@ $height_shown_header: 45px;
         align-items: center;
         animation: jump_up 0.25s ease-in-out;
         span.message {
+          max-width: 82.5%;
           padding-left: 10px;
           text-align: left;
           color: $col_font_white;
