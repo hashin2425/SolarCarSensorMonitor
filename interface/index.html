@@ -50,20 +50,17 @@
         </div>
       </div>
       <div id="main_connection_settings" style="display: none">
-        <div id="devices_container">
-          <div id="refresh_device_container">デバイス一覧を更新する</div>
-          <div id="devices_list">
-            <div class="found_device">
-              <div class="name">Device1</div>
-              <div class="connection">Bluetooth 000000000000</div>
-            </div>
-            <div class="found_device">
-              <div class="name">Device1</div>
-              <div class="connection">Bluetooth 000000000000</div>
-            </div>
-          </div>
-        </div>
-        <div id="device_raw_view">a</div>
+        <table>
+          <thead>
+            <tr>
+              <td colspan="2">接続先リスト</td>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ここに接続先リストを生成 -->
+          </tbody>
+        </table>
+        <div id="refresh_device_list" onclick="on_reset_connection_list_button_pushed();"><span>リストを更新する</span><span>（20秒程度かかります）</span></div>
       </div>
       <div id="main_display_settings" style="display: none">
         <table>

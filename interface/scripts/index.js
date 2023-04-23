@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
 
-    document.getElementById("header_show_settings").click(); // 起動時にデバイス接続設定の画面を表示
+    document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
   } catch (e) {
     show_error(e);
   }
@@ -281,12 +281,12 @@ function add_timestamp_insert(unix) {
 }
 
 function timestamp_onchange() {
-  console.log(document.getElementById("1").value);
+  // console.log(document.getElementById("1").value);
 }
 
 setInterval(function () {
   const timeout_ms = 3000;
-  console.log(new Date().getTime() - unix_before_data_updated);
+  // console.log(new Date().getTime() - unix_before_data_updated);
   if (new Date().getTime() - unix_before_data_updated > timeout_ms) {
     document.getElementById("alert_timeout").setAttribute("style", "display: block;");
     setTimeout(() => {
@@ -366,4 +366,36 @@ function focus_graph_to(id) {
   }
 
   now_focus_graph_id = id;
+}
+
+eel.expose(reload_connection_list);
+function reload_connection_list(connection_list, clear_all = false) {
+  const tbody = document.getElementById("main_connection_settings").getElementsByTagName("tbody")[0];
+  if (clear_all) {
+    tbody.innerHTML = "";
+  }
+  if (connection_list != undefined) {
+    Object.keys(connection_list).forEach((id) => {
+      tbody.innerHTML += `
+      <tr>
+        <td class="info">
+          <div class="name">${connection_list[id].name}</div>
+          <div class="type">${connection_list[id].type}</div>
+          <div class="address">${id}</div>
+          <div class="connection_button">接続する</div>
+        </td>
+        <td class="preview">
+          <div class="raw_received_label">受信結果</div>
+          <div class="raw_received">
+            ${connection_list[id].response}
+          </div>
+        </td>
+      </tr>
+    `;
+    });
+  }
+}
+function on_reset_connection_list_button_pushed() {
+  reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
+  eel.get_device_list();
 }

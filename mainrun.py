@@ -3,6 +3,16 @@ import eel
 # https://qiita.com/inoory/items/f431c581332c8d500a3b
 # pip install Eel
 
+import bluetooth
+# https://pypi.org/project/pybluez2/
+# pip install pybluez2
+
+import serial
+from serial.tools import list_ports
+# https://pypi.org/project/pyserial/
+# pip install pyserial
+
+# Python3標準ライブラリ
 import json
 import re
 import os
@@ -18,6 +28,31 @@ is_window_shown = False
 is_continue_receive_send_data = True
 path_settings = "./settings/settings.json"
 path_antecedence_settings = "./settings/settings.env.json"
+device_list = dict()
+
+@eel.expose
+def get_device_list():
+    global device_list
+    device_list = dict()
+    # self.device_list = {
+    # '00:00:00:00:00:00': {'name': 'AAA', 'type': 'bluetooth', 'response': 'None'},
+    # 'COM1': {'name': 'BBB', 'type': 'serial', 'response': 'None'},
+    # }
+
+    # Wired
+    for device in list_ports.comports():
+        temp = {"name":device.description, "type":"serial", "response":"temporary treat as none"}
+        eel.reload_connection_list({device.device:temp}) # type:ignore
+        device_list[device.device] = temp
+
+    # Bluetooth
+    # ここで10秒くらいかかる
+    for device in bluetooth.discover_devices(lookup_names=True,lookup_class=False):
+        temp = {"name":device[1], "type":"bluetooth", "response":"temporary treat as none"}
+        eel.reload_connection_list({device[0]:temp}) # type:ignore
+        device_list[device[0]] = temp
+
+    return device_list
 
 
 def generate_dummy_data(dic):

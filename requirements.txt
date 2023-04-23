@@ -2,5 +2,7 @@
 eel
 pyinstaller
 py2exe
+PyBluez2
+pyserial
 
 ###### Requirements with Version Specifiers ######`

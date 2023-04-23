@@ -4,5 +4,7 @@
         "venv",
         "mainrun",
         "onefile",
+        "pybluez2",
+        "pyserial",
     ]
 }

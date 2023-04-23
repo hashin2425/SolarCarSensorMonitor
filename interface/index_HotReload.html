@@ -56,11 +56,21 @@
           },
         },
       };
+      const connection_list = {
+        COM0: { name: "通信ポート (COM0)", type: "serial", response: "None" },
+        COM1: { name: "通信ポート (COM1)", type: "serial", response: "None" },
+        COM2: { name: "通信ポート (COM2)", type: "serial", response: "None" },
+        "00:00:00:00:00:00": { name: "DEVICE0", type: "bluetooth", response: "None" },
+        "00:00:00:00:00:01": { name: "DEVICE1", type: "bluetooth", response: "None" },
+        "00:00:00:00:00:02": { name: "DEVICE2", type: "bluetooth", response: "None" },
+        "00:00:00:00:00:03": { name: "DEVICE3", type: "bluetooth", response: "None" },
+      };
 
       document.addEventListener("DOMContentLoaded", (event) => {
         document.getElementById("main_iframe").onload = () => {
           // 初期起動時の設定
           document.getElementById("main_iframe").contentWindow.Get_Initial_Settings(dummy_settings);
+          document.getElementById("main_iframe").contentWindow.reload_connection_list(connection_list, (clear_all = true));
 
           // 定期動作時の処理
           setInterval(() => {

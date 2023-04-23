@@ -180,35 +180,109 @@ html {
         }
       }
       div#main_connection_settings {
-        div#devices_container {
-          width: 30%;
-          min-width: min-content;
-          div#refresh_device_container {
-            margin: 5px;
-            padding: 5px;
-            &:hover {
-              background-color: rgba(0, 0, 0, 0.25);
+        width: 100%;
+        table {
+          width: 100%;
+          height: 100%;
+          margin: 10px;
+          border-collapse: collapse;
+          thead {
+            td {
+              padding-left: 5px;
+              min-height: 75px;
             }
-            &:active {
-              transform: translateY(4px);
-            }
+            background-color: $color1;
+            color: $col_font_white;
           }
-          div#devices_list {
-            div.found_device {
+          tbody {
+            tr {
+              height: 15%;
               &:hover {
-                background-color: rgba(0, 0, 0, 0.25);
+                background-color: rgba(0, 0, 0, 0.1);
               }
-              div.name {
-                font-size: 15pt;
-              }
-              div.connection {
-                font-size: 10pt;
+              td {
+                border-bottom: $color1 solid 1px;
+                padding-top: 5px;
+                padding-bottom: 20px;
+                &.info {
+                  width: 30%;
+                }
+                &.preview {
+                  width: 70%;
+                }
+                div.name {
+                  font-size: 25px;
+                }
+                div.type {
+                  font-size: 15px;
+                }
+                div.address {
+                  font-size: 15px;
+                }
+                div.connection_button {
+                  width: auto;
+                  font-size: 20px;
+                  margin: 5px 5px 5px 0px;
+                  padding: 0px 0px 0px 5px;
+                  border: 1px solid transparent;
+                  &:hover {
+                    border-color: $color3;
+                    color: $col_font_white;
+                    background-color: $color3;
+                  }
+                  &:not(:hover) {
+                    border-color: $color3;
+                    color: $color3;
+                    background-color: $col_font_white;
+                  }
+                  &:active {
+                    transform: translateY(2px);
+                  }
+                }
+                div.raw_received_label {
+                  padding-left: 5px;
+                  font-size: 12px;
+                  height: 20%;
+                }
+                div.raw_received {
+                  padding-left: 5px;
+                  height: 80%;
+                  overflow: auto;
+                  font-size: 10px;
+                  word-break: break-word;
+                  &::-webkit-scrollbar {
+                    width: 5px;
+                    background-color: white;
+                  }
+                  &::-webkit-scrollbar-thumb {
+                    width: 5px;
+                    background-color: $color1;
+                  }
+                }
               }
             }
           }
         }
-        div#device_raw_view {
-          width: 70%;
+        div#refresh_device_list {
+          position: fixed;
+          bottom: 10px;
+          right: 10px;
+          padding: 3px 10px;
+          border-radius: 5px;
+          border: transparent 2px solid;
+          &:hover {
+            border-color: $col_font_white;
+            color: $col_font_white;
+            background-color: $color3;
+          }
+          &:not(:hover) {
+            border-color: $color3;
+            color: $color3;
+            background-color: $col_font_white;
+          }
+          &:active {
+            transform: translateY(2px);
+          }
         }
       }
       div#main_display_settings {
