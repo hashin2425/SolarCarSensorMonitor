@@ -5,7 +5,10 @@
         "update_interval_sec": 0.1,
         //
         // グラフの表示データ件数（件）
-        "graph_max_display": 100
+        "graph_max_display": 100,
+        //
+        // ダークモードの有効無効切り替え
+        "dark_mode": false
     },
     "data_logging": {
         //

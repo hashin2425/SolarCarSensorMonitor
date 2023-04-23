@@ -1,18 +1,16 @@
-$color0: #eeeeee;
-$color1: #393e46;
-$color2: #222831;
-$color3: #00adb5;
-$color4: #cfcfcf;
-$col_values: #4313b4;
-$col_font_black: black;
-$col_font_white: white;
 $height_shown_header: 45px;
 
-html {
-  background-color: $color0;
-  user-select: none;
-  height: 100%;
+@mixin body_mixin($color_palette) {
+  $color0: map-get($color_palette, color0);
+  $color1: map-get($color_palette, color1);
+  $color2: map-get($color_palette, color2);
+  $color3: map-get($color_palette, color3);
+  $color4: map-get($color_palette, color4);
+  $col_values: map-get($color_palette, col_values);
+  $col_font_black: map-get($color_palette, col_font_black);
+  $col_font_white: map-get($color_palette, col_font_white);
   body {
+    background-color: $color0;
     margin: 0;
     height: 100%;
     div#alert_timeout {
@@ -61,7 +59,7 @@ html {
               cursor: pointer;
             }
             &.displayed {
-              border-bottom: 2px solid $color0;
+              border-bottom: 2px solid white;
             }
             &:not(.displayed) {
               padding-bottom: 2px;
@@ -212,12 +210,15 @@ html {
                 }
                 div.name {
                   font-size: 25px;
+                  color: $col_font_black;
                 }
                 div.type {
                   font-size: 15px;
+                  color: $col_font_black;
                 }
                 div.address {
                   font-size: 15px;
+                  color: $col_font_black;
                 }
                 div.connection_button {
                   width: auto;
@@ -233,7 +234,7 @@ html {
                   &:not(:hover) {
                     border-color: $color3;
                     color: $color3;
-                    background-color: $col_font_white;
+                    background-color: $color0;
                   }
                   &:active {
                     transform: translateY(2px);
@@ -243,8 +244,10 @@ html {
                   padding-left: 5px;
                   font-size: 12px;
                   height: 20%;
+                  color: $col_font_black;
                 }
                 div.raw_received {
+                  color: $col_font_black;
                   padding-left: 5px;
                   height: 80%;
                   overflow: auto;
@@ -266,34 +269,47 @@ html {
       }
       div#main_display_settings {
         width: 100%;
-        table {
+        display: flex;
+        flex-direction: column;
+        div.table_container {
           margin: 10px;
-          width: 100%;
-          border-collapse: collapse;
-          input {
-            border: none;
-            height: 100%;
-            width: calc(100% - 10px);
+          span.table_title {
+            display: block;
+            color: $col_font_black;
             font-size: 20px;
-            margin: 5px;
           }
-          tr {
-            &:hover {
-              background-color: rgba(0, 0, 0, 0.1);
+          table {
+            margin-bottom: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            input {
+              border: none;
+              height: 100%;
+              width: calc(100% - 10px);
+              font-size: 20px;
+              margin: 5px;
+              background-color: $color0;
+              color: $col_font_black;
             }
-            td {
-              min-width: 75px;
-              padding-left: 5px;
-              border-spacing: 0;
-              border-bottom: $color1 solid 1px;
+            tr {
+              &:hover {
+                background-color: rgba(0, 0, 0, 0.1);
+              }
+              td {
+                min-width: 75px;
+                padding-left: 5px;
+                border-spacing: 0;
+                border-bottom: $color1 solid 1px;
+              }
             }
-          }
-          thead {
-            background-color: $color1;
-            color: $col_font_white;
-          }
-          tbody {
-            min-height: 25px;
+            thead {
+              background-color: $color1;
+              color: $col_font_white;
+            }
+            tbody {
+              color: $col_font_black;
+              min-height: 25px;
+            }
           }
         }
       }
@@ -327,7 +343,7 @@ html {
           &:not(:hover) {
             border-color: $color3;
             color: $color3;
-            background-color: $col_font_white;
+            background-color: $color0;
           }
           &:active {
             transform: translateY(2px);
@@ -340,33 +356,64 @@ html {
       background-color: $color2;
     }
   }
+
+  canvas {
+    width: 100pt;
+    height: 100pt;
+  }
+
+  @keyframes alert {
+    0% {
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+    100% {
+      background-color: rgba(255, 0, 0, 0.01);
+    }
+  }
+
+  @keyframes jump_up {
+    0% {
+      transform: translateY(5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  ::-webkit-scrollbar {
+    // スクロールバーを見せない
+    width: 0px;
+    height: 0px;
+  }
 }
 
-canvas {
-  width: 100pt;
-  height: 100pt;
-}
-
-@keyframes alert {
-  0% {
-    background-color: rgba(255, 0, 0, 0.3);
+html {
+  user-select: none;
+  height: 100%;
+  &.light {
+    $color_palette: (
+      color0: #eeeeee,
+      color1: #393e46,
+      color2: #222831,
+      color3: #00adb5,
+      color4: #cfcfcf,
+      col_values: #4313b4,
+      col_font_black: black,
+      col_font_white: white,
+    );
+    @include body_mixin($color_palette);
   }
-  100% {
-    background-color: $color4;
+  &.dark {
+    $color_palette: (
+      color0: rgb(35, 35, 35),
+      color1: rgb(50, 50, 50),
+      color2: rgb(30, 30, 40),
+      color3: rgb(0, 190, 200),
+      color4: rgb(55, 55, 55),
+      col_values: #4313b4,
+      col_font_black: white,
+      col_font_white: white,
+    );
+    @include body_mixin($color_palette);
   }
-}
-
-@keyframes jump_up {
-  0% {
-    transform: translateY(5px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-::-webkit-scrollbar {
-  // スクロールバーを見せない
-  width: 0px;
-  height: 0px;
 }

@@ -123,7 +123,7 @@ function Get_Initial_Settings(provided_setting_dict) {
     });
 
     // Insert settings
-    const setting_tbody = document.getElementById("main_display_settings").getElementsByTagName("tbody")[0];
+    const setting_tbody = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
     const changeable_settings_key = ["interface", "data_logging"];
     changeable_settings_key.forEach(function (key) {
       if (Object.keys(general_settings).includes(key)) {
@@ -398,4 +398,14 @@ function reload_connection_list(connection_list, clear_all = false) {
 function on_reset_connection_list_button_pushed() {
   reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
   eel.get_device_list();
+}
+
+function change_dark_mode() {
+  if (document.getElementsByTagName("html")[0].classList.contains("dark")) {
+    document.getElementsByTagName("html")[0].classList.remove("dark");
+    document.getElementsByTagName("html")[0].classList.add("light");
+  } else {
+    document.getElementsByTagName("html")[0].classList.remove("light");
+    document.getElementsByTagName("html")[0].classList.add("dark");
+  }
 }

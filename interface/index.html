@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="jp">
+<html lang="jp" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -67,19 +67,40 @@
         </div>
       </div>
       <div id="main_display_settings" style="display: none">
-        <table>
-          <thead>
-            <tr>
-              <td>設定項目</td>
-              <td>説明</td>
-              <td>初期値</td>
-              <td>現在値</td>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- ここに設定項目を挿入 -->
-          </tbody>
-        </table>
+        <div class="table_container">
+          <span class="table_title">機能一覧</span>
+          <table>
+            <thead>
+              <tr>
+                <td>機能</td>
+                <td>オプション</td>
+                <td>適応</td>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ここに設定項目を挿入する。標準機能（ダークモード表示など）はここに設置する -->
+              <tr>
+                <td>ダークモード</td>
+                <td></td>
+                <td><div onclick="change_dark_mode();">切り替え</div></td>
+              </tr>
+            </tbody>
+          </table>
+          <span class="table_title">設定一覧</span>
+          <table class="change_settings">
+            <thead>
+              <tr>
+                <td>設定項目</td>
+                <td>説明</td>
+                <td>初期値</td>
+                <td>現在値</td>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ここに設定項目を挿入 -->
+            </tbody>
+          </table>
+        </div>
         <div class="container_footer">
           <span class="message">ここで表示やデータ処理に関する設定を変更できます。</span>
           <div class="button" id="submit_setting">変更を適応する</div>
