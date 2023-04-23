@@ -358,10 +358,7 @@ canvas {
 
 @keyframes jump_up {
   0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
+    transform: translateY(5px);
   }
   100% {
     transform: translateY(0);
