@@ -42,16 +42,30 @@ def get_device_list():
 
     # Wired
     for device in list_ports.comports():
-        temp = {"name":device.description, "type":"serial", "response":"temporary treat as none"}
-        eel.reload_connection_list({device.device:temp}) # type:ignore
-        device_list[device.device] = temp
+        temp_response = "Timeout"
+        try:
+            with serial.Serial(device.device, 9600, timeout=1) as con:
+                temp_response = con.read(999999).decode("utf-8") # 999999byteまで取得
+        except Exception as e:
+            temp_response = str(e)
+        finally:
+            temp = {"name":device.description, "type":"serial", "response":temp_response}
+            eel.reload_connection_list({device.device:temp}) # type:ignore
+            device_list[device.device] = temp
 
     # Bluetooth
-    # ここで10秒くらいかかる
-    for device in bluetooth.discover_devices(lookup_names=True,lookup_class=False):
-        temp = {"name":device[1], "type":"bluetooth", "response":"temporary treat as none"}
-        eel.reload_connection_list({device[0]:temp}) # type:ignore
-        device_list[device[0]] = temp
+    for device in bluetooth.discover_devices(lookup_names=True,lookup_class=False): # ここで10秒くらいかかる
+        temp_response = "Timeout"
+        try:
+            with bluetooth.BluetoothSocket(bluetooth.RFCOMM) as con:
+                con.connect((device[0], 1))
+                temp_response = con.recv(1024).decode("utf-8")
+        except Exception as e:
+            temp_response = str(e)
+        finally:
+            temp = {"name":device[1], "type":"bluetooth", "response":temp_response}
+            eel.reload_connection_list({device[0]:temp}) # type:ignore
+            device_list[device[0]] = temp
 
     eel.progress_manager("connection_list_update_done") # type:ignore
 
