@@ -6,6 +6,7 @@ let unix_before_graph_updated = new Date().getTime();
 let unix_before_data_updated = new Date().getTime();
 let now_focus_graph_id = "all"; // "all" or value_id
 let large_chart_obj = undefined;
+let is_allow_all_graph_update = true;
 
 function show_error(e) {
   console.error(e);
@@ -170,7 +171,7 @@ function Data_PY2JS(data) {
       unix_before_graph_updated = new Date().getTime();
     }
 
-    if (now_focus_graph_id != "all") {
+    if (now_focus_graph_id != "all" && is_allow_all_graph_update) {
       large_chart_obj.update();
     }
 
@@ -186,7 +187,7 @@ function Data_PY2JS(data) {
         }
 
         var is_display_all_graphs = "all" == now_focus_graph_id;
-        if (is_display_all_graphs && is_interval_update_graph) {
+        if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
           dataset_list[id].chart_obj.update();
         }
 
@@ -248,17 +249,20 @@ function on_clicked_header_button(comment) {
       document.getElementById("main").setAttribute("style", "margin-top:45px;");
     }
     if ("show_graphs" == comment) {
+      is_allow_all_graph_update = true;
       hide_container();
       document.getElementById("header_show_graphs").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
     }
     if ("show_connection" == comment) {
+      is_allow_all_graph_update = false;
       hide_container();
       document.getElementById("header_show_connection").classList.add("displayed");
       document.getElementById("main_connection_settings").setAttribute("style", "display:flex;");
     }
 
     if ("show_settings" == comment) {
+      is_allow_all_graph_update = false;
       hide_container();
       document.getElementById("header_show_settings").classList.add("displayed");
       document.getElementById("main_display_settings").setAttribute("style", "display:flex;");
@@ -363,7 +367,9 @@ function focus_graph_to(id) {
         },
       },
     });
-    large_chart_obj.update();
+    if (is_allow_all_graph_update) {
+      large_chart_obj.update();
+    }
   }
 
   now_focus_graph_id = id;
