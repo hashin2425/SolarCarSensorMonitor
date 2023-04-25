@@ -26,7 +26,7 @@ Python スクリプトとして実行するほうが望ましい。
 
 - `.\.venv\Scripts\python.exe -m eel mainrun.py interface --onefile --icon=interface/favicon.ico --clean --name=SolarCarSensorMonitor`を実行する。
   - `--onefile`：ひとつのファイルに纏める。
-  - `--icon=something.ico`：EXE ファイルのアイコンを指定
+  - `--icon=something.ico`：EXE ファイルのアイコンを指定する。ファイル形式は`.ico`のみ。
   - `--clean`：一時ファイルを削除
   - `--name=app_name`：EXE ファイルの名前を指定
 - 簡単
@@ -104,4 +104,4 @@ VScode 環境であれば、`Profile:Launch Main Window`を実行することで
 
 ### LineProfiler を使う
 
-PythonライブラリのLineProfilerを使う。直感的に処理時間を調べることができるものの、コードを改変しなければならない範囲が大きいため、注意が必要。
+Python ライブラリの LineProfiler を使う。直感的に処理時間を調べることができるものの、コードを改変しなければならない範囲が大きいため、注意が必要。
