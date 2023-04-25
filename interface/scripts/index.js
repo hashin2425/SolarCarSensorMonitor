@@ -45,6 +45,13 @@ function Get_Initial_Settings(provided_setting_dict) {
       dataset_list[id]["data"] = [];
     });
 
+    // change dark mode
+    if (general_settings.interface.dark_mode) {
+      change_dark_mode((change_to = "dark"));
+    } else {
+      change_dark_mode((change_to = "light"));
+    }
+
     // Insert elements in container
     const containers = document.getElementById("graphs");
     const indicators = document.getElementById("indicators");
@@ -409,13 +416,20 @@ function on_reset_connection_list_button_pushed() {
   }
 }
 
-function change_dark_mode() {
-  if (document.getElementsByTagName("html")[0].classList.contains("dark")) {
+function change_dark_mode(change_to = "") {
+  const is_now_dark_mode = document.getElementsByTagName("html")[0].classList.contains("dark");
+
+  const is_change_to_dark = change_to == "dark" || (change_to == "" && !is_now_dark_mode);
+  const is_change_to_light = change_to == "light" || (change_to == "" && is_now_dark_mode);
+
+  if (is_change_to_light) {
     document.getElementsByTagName("html")[0].classList.remove("dark");
     document.getElementsByTagName("html")[0].classList.add("light");
-  } else {
+    return;
+  } else if (is_change_to_dark) {
     document.getElementsByTagName("html")[0].classList.remove("light");
     document.getElementsByTagName("html")[0].classList.add("dark");
+    return;
   }
 }
 
