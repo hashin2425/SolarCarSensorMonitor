@@ -30,6 +30,7 @@ path_settings = "./settings/settings.json"
 path_antecedence_settings = "./settings/settings.env.json"
 device_list = dict()
 
+# ---- データ処理関連 ----
 @eel.expose
 def get_device_list():
     global device_list
@@ -82,24 +83,21 @@ def generate_dummy_data(dic):
 def receive_send_data():
     global is_continue_receive_send_data, latest_data_dict
     filename = f"store/indicators_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    if not "--DisableBackGroundLogging" in sys.argv:
+    if not is_disabled_background_logging:
         with open(filename, mode="a", encoding="UTF-8") as file:
             file.write("datetime," + ",".join(latest_data_dict.keys()) + "\n")
     while is_continue_receive_send_data:
         if is_use_dummy_data:
             latest_data_dict = generate_dummy_data(latest_data_dict)  # 一時的にデータを生成する
         eel.Data_PY2JS(latest_data_dict)  # type: ignore
-        if not "--DisableBackGroundLogging" in sys.argv:
+        if not is_disabled_background_logging:
             with open(filename, mode="a", encoding="UTF-8") as file:
                 file.write(str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "\n")
         eel.sleep(random.random() / 5)
 
+# ---- データ処理関連ここまで ----
 
-def after_closed_window(page, socket):
-    global is_window_shown
-    is_window_shown = False
-
-
+# ---- GUI生成関連 ----
 def start_window():
     global is_window_shown
     is_window_shown = True
@@ -117,14 +115,12 @@ def start_window():
     update_connection_list_th = Thread(target=get_device_list)
     update_connection_list_th.start()
 
-def load_JsonWithComment(path):
-    with open(path, mode="r", encoding="UTF-8") as file:
-        raw_text = file.read()
-    text_comments_removed = re.sub(r'/\*[\s\S]*?\*/|//.*', '', raw_text)
-    setting = json.loads(text_comments_removed)
-    return setting
+def after_closed_window(page, socket):
+    global is_window_shown
+    is_window_shown = False
 
-def end_all_system():
+
+def kill_entire_system():
     global is_continue_receive_send_data
     while True:
         if thread.is_alive():
@@ -132,15 +128,27 @@ def end_all_system():
         else:
             sys.exit()
 
+# ---- GUI生成関連ここまで ----
 
-## Args
+# ---- その他関数類 ----
+def load_JsonWithComment(path):
+    with open(path, mode="r", encoding="UTF-8") as file:
+        raw_text = file.read()
+    text_comments_removed = re.sub(r'/\*[\s\S]*?\*/|//.*', '', raw_text)
+    setting = json.loads(text_comments_removed)
+    return setting
+
+# ---- その他関数類ここまで ----
+
+# ---- Args ----
 print("Args:", sys.argv)
 ## --DisableBackGroundLogging : ログファイルの生成を停止する。デバッグ用
 is_disabled_background_logging = "--DisableBackGroundLogging" in sys.argv
-
+#
 ## --UseDummyData : ログファイルの生成を停止する。デバッグ用
 is_use_dummy_data = "--UseDummyData" in sys.argv
-
+#
+# ---- Argsここまで ----
 
 if __name__ == "__main__":
     # CSVファイルの保存先ディレクトリを生成
@@ -169,10 +177,10 @@ if __name__ == "__main__":
     while True:
         eel.sleep(0.1)  # waitさせないとページにアクセスできない
         if is_disabled_background_logging == True and is_window_shown == False:
-            end_all_system()
+            kill_entire_system()
         if is_disabled_background_logging == False and is_window_shown == False:
             input_character = input("ダッシュボードを閉じましたが、システムは稼働しています。\nシステム(Python)を終了する -> c\nもう一度ダッシュボードを開く -> o\n")
             if input_character == "c":
-                end_all_system()
+                kill_entire_system()
             elif input_character == "o":
                 start_window()
