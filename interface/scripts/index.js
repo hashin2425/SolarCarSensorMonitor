@@ -125,7 +125,7 @@ function Get_Initial_Settings(provided_setting_dict) {
     });
 
     // Insert settings
-    const setting_tbody = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
+    const setting_tbody = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0].getElementsByTagName("tbody")[0];
     const changeable_settings_key = ["interface", "data_logging"];
     changeable_settings_key.forEach(function (key) {
       if (Object.keys(general_settings).includes(key)) {
@@ -445,6 +445,24 @@ function progress_manager(message) {
       insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストの更新が終わりました。ここで接続先デバイスを選ぶことができます。リストの更新には20秒程度かかります。", true);
       is_now_updating_connection_list = false;
     }
+  } catch {
+    show_error(e);
+  }
+}
+
+function apply_new_settings() {
+  try {
+    const settings_table = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
+    const settings_table_body = settings_table.getElementsByTagName("tbody")[0];
+    const settings_table_body_trs = settings_table_body.getElementsByTagName("tr");
+    Array.from(settings_table_body_trs).forEach((tr) => {
+      var variable_id = tr.getElementsByTagName("td")[0].textContent;
+      var variable_value = tr.getElementsByTagName("input")[0].value;
+      var variable_id_parent = variable_id.split(".")[0];
+      var variable_id_child = variable_id.split(".")[1];
+      general_settings[variable_id_parent][variable_id_child] = variable_value;
+    });
+    insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);
   } catch {
     show_error(e);
   }
