@@ -35,8 +35,8 @@ function Get_Initial_Settings(provided_setting_dict) {
   try {
     console.log("Initialize start");
 
-    Object.keys(provided_setting_dict).forEach(function (id) {
-      general_settings[id] = provided_setting_dict[id];
+    Object.keys(provided_setting_dict.values).forEach(function (id) {
+      general_settings[id] = provided_setting_dict.values[id];
     });
     // Initialize dataset_list
     Object.keys(general_settings.data_list).forEach(function (id) {
@@ -146,7 +146,7 @@ function Get_Initial_Settings(provided_setting_dict) {
           setting_tbody.innerHTML += `\
             <tr>\
               <td>${key}.${id}</td>\
-              <td>Explain</td>\
+              <td>${provided_setting_dict.description[key][id].replace("\n", "<br>")}</td>\
               <td>${general_settings[key][id]}</td>\
               <td><input type="${value_type}" id="setting_${key}_${id}" value="${general_settings[key][id]}"/></td>\
             </tr>\

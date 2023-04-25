@@ -26,9 +26,77 @@ from threading import Thread
 latest_data_dict = dict() # 最新のデータのみを格納する
 is_window_shown = False
 is_continue_receive_send_data = True
-path_settings = "./settings/settings.json"
-path_antecedence_settings = "./settings/settings.env.json"
+path_antecedence_settings = "./settings.env.json"
 device_list = dict()
+
+# ---- 設定項目 ----
+initial_settings = {
+    "description":{
+        "interface": {
+            "update_interval_sec":"グラフの描画間隔を指定します。数値を小さくすると、高頻度に更新されますが、端末の負荷が上昇します。単位は秒。",
+            "graph_max_display":"グラフに表示するデータの数を指定します。単位は件数。",
+            "dark_mode":"起動時のダークモードの有効/無効を指定します。",
+        },
+        "data_logging": {
+            "data_log_dir": "ロギングの保存先ファイル名を指定します。ソフトウェアのexeが存在するディレクトリ上にファイルを生成します。",
+            "data_log_filename": "ロギングによって生成されたファイルの接頭辞を指定します。日時と拡張子が自動的に補完されます。例：log_20220101_1010.csv",
+        }
+    },    "values":{
+    "interface": {
+        "update_interval_sec": 0.1,
+        "graph_max_display": 100,
+        "dark_mode": False,
+    },
+    "data_logging": {
+        "data_log_dir": "store",
+        "data_log_filename": "log"
+    },
+    "data_list": {
+        "battery_v": {
+            "display_name": "バッテリー電圧",
+            "unit": "V",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        },
+        "battery_a": {
+            "display_name": "バッテリー残量",
+            "unit": "A",
+            "safe_range_min": 0,
+            "safe_range_max": 2
+        },
+        "battery_temp": {
+            "display_name": "バッテリー温度",
+            "unit": "℃",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        },
+        "body_temp": {
+            "display_name": "機体温度",
+            "unit": "℃",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        },
+        "speed": {
+            "display_name": "速度",
+            "unit": "km/h",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        },
+        "accelerator": {
+            "display_name": "アクセル",
+            "unit": "%",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        },
+        "break": {
+            "display_name": "ブレーキ",
+            "unit": "%",
+            "safe_range_min": -10000,
+            "safe_range_max": 10000
+        }
+    }
+}}
+# ---- 設定項目ここまで ----
 
 # ---- データ処理関連 ----
 @eel.expose
@@ -110,7 +178,7 @@ def start_window():
         close_callback=after_closed_window,
         block=False
     )
-    eel.Get_Initial_Settings(settings) # type: ignore
+    eel.Get_Initial_Settings(initial_settings) # type: ignore
 
     update_connection_list_th = Thread(target=get_device_list)
     update_connection_list_th.start()
@@ -160,14 +228,13 @@ if __name__ == "__main__":
     eel.init("interface")
 
     # load setting.json
-    settings = load_JsonWithComment(path_settings)
-    for k in settings["data_list"].keys():
+    for k in initial_settings["values"]["data_list"].keys():
         latest_data_dict[k] = 0  # 初期化
 
     # load settings.env.json
     if os.path.exists(path_antecedence_settings):
         antecedence_setting = load_JsonWithComment(path_antecedence_settings)
-        settings.update(antecedence_setting)
+        initial_settings["values"].update(antecedence_setting)
 
     thread = Thread(target=receive_send_data)
     thread.start()
