@@ -7,6 +7,7 @@ let unix_before_data_updated = new Date().getTime();
 let now_focus_graph_id = "all"; // "all" or value_id
 let large_chart_obj = undefined;
 let is_allow_all_graph_update = true;
+let typingIntervals = {};
 
 function show_error(e) {
   console.error(e);
@@ -434,15 +435,19 @@ function change_dark_mode(change_to = "") {
 }
 
 function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
+  if (typingIntervals[element]) {
+    clearInterval(typingIntervals[element]);
+    delete typingIntervals[element];
+  }
   if (is_clear) {
     element.textContent = "";
   }
   let cursor = 0;
-  const interval = setInterval(() => {
+  typingIntervals[element] = setInterval(() => {
     element.textContent += text.charAt(cursor);
     cursor++;
     if (cursor === text.length) {
-      clearInterval(interval);
+      clearInterval(typingIntervals[element]);
     }
   }, interval_ms);
 }
