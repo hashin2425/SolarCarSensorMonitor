@@ -25,7 +25,7 @@ Python スクリプトとして実行するほうが望ましい。
 ### PyInstaller を使う
 
 - `.\.venv\Scripts\python.exe -m eel mainrun.py interface --onefile --icon=interface/favicon.ico --clean --name=SolarCarSensorMonitor`を実行する。
-  - `--onefile`：ひとつのファイルに纏める。
+  - `--onefile`：ひとつのファイルに纏める。圧縮が行われるため、容量が小さくなるが、起動に時間がかかる
   - `--icon=something.ico`：EXE ファイルのアイコンを指定する。ファイル形式は`.ico`のみ。
   - `--clean`：一時ファイルを削除
   - `--name=app_name`：EXE ファイルの名前を指定
