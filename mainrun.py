@@ -1,4 +1,4 @@
-import eel
+import eel # 起動時にかかる時間の16％が費やされている
 # https://pypi.org/project/Eel/
 # https://qiita.com/inoory/items/f431c581332c8d500a3b
 # pip install Eel
@@ -19,7 +19,7 @@ import os
 import sys
 import random
 from math import sin
-from time import sleep, time
+from time import sleep, time, perf_counter
 from datetime import datetime as dt
 from threading import Thread
 
@@ -223,9 +223,10 @@ if __name__ == "__main__":
     if not os.path.exists("store"):
         os.mkdir("store")
 
-    # あらかじめinterfaceフォルダの親ディレクトリに移動してから実行する（でないとエラーになる）
-    # interfaceフォルダにhtmlやcssを入れる
-    eel.init("interface")
+    # eel.init("interface") # 起動時にかかる時間の82％が費やされる
+    # allowed_extensions=["eel_js"]によって、起動時の処理時間を1~2秒短縮できる。
+    # 内部ではinterfaceディレクトリの解析が行われており、余計なスクリプトファイルを除外して解析することによって処理時間が短縮される。
+    eel.init("interface", allowed_extensions=["eel_js"])
 
     # load setting.json
     for k in initial_settings["values"]["data_list"].keys():
