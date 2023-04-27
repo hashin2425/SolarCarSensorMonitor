@@ -66,6 +66,60 @@ $height_shown_header: 45px;
             }
           }
         }
+        div#header_notifications {
+          display: flex;
+          div.notification_icon {
+            display: flex;
+            position: relative;
+            div.notification_initial {
+              margin: 2pt;
+              border: $color3 solid 2px;
+              color: $color3;
+              border-radius: 10px;
+              width: 25px;
+              height: 25px;
+              text-align: center;
+              line-height: 25px;
+              animation: append_notification 0.5s forwards;
+              @keyframes append_notification {
+                0% {
+                  transform: translateY(-30px);
+                  background-color: $color3;
+                }
+                100% {
+                  transform: translateY(0px);
+                  background-color: transparent;
+                }
+              }
+            }
+            div.notification_popup {
+              position: absolute;
+              display: none;
+              background-color: $color0;
+              color: $col_font_black;
+              width: 250px;
+              border-radius: 5px;
+              padding: 10px;
+              top: 45px;
+              right: 0px;
+              border: $color3 solid 2px;
+            }
+            div.notification_popup::before {
+              content: "";
+              position: absolute;
+              width: 0;
+              height: 0;
+              border-left: 10px solid transparent;
+              border-right: 10px solid transparent;
+              border-bottom: 10px solid $color3;
+              top: -10px;
+              right: 5px;
+            }
+            div.notification_initial:hover + div.notification_popup {
+              display: block;
+            }
+          }
+        }
       }
       div#header_on_hidden {
         &:hover {
