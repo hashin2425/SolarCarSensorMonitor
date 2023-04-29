@@ -1,5 +1,31 @@
 # SolarCarSensorMonitor
 
+## 利用方法
+
+### 接続
+
+1. マイコンとコンピューターを接続する。（Bluetooth を利用する場合、先に OS の設定から接続を行う。）
+2. アプリケーションの接続先リストからマイコンを選択し、接続する。
+
+### マイコン側の出力
+
+`ValueName:Value\n`と出力することで、`ValueName`の値が`Value`であると送信できる。名前と数値の間は半角コロン`:`で区切る。
+
+以下は、方角センサーから取得した値を`direction`として送信するユースケースである。
+
+```cpp
+int direction_sensor_value = 180; // センサーから取得した値として使用する
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  Serial.println("direction:" + String(direction_sensor_value));
+  delay(1000);
+}
+```
+
 ## 環境
 
 - Python 3.10.11
