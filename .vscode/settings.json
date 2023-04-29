@@ -1,10 +1,38 @@
 {
-    "python.analysis.typeCheckingMode": "basic",
+    // Global
     "cSpell.words": [
         "venv",
         "mainrun",
         "onefile",
         "pybluez2",
         "pyserial",
-    ]
+        "RFCOMM"
+    ],
+    "editor.formatOnSave": true,
+    // Python
+    "python.analysis.typeCheckingMode": "basic",
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.lintOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "flake8.args": [
+        "--max-line-length=300",
+        //"--disable=W0603",
+        //"--ignore=W0603"
+    ],
+    "python.formatting.blackArgs": [
+        "--line-length=300",
+        //"--disable=W0603",
+        //"--ignore=W0603",
+
+    ],
+    "pylint.args": [
+        "--max-line-length=300",
+        "--disable=W0603,E1101,C0116,C0103",
+    ],
 }
