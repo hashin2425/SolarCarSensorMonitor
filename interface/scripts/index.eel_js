@@ -69,7 +69,7 @@ function Get_Initial_Settings(provided_setting_dict) {
       <div class="container container_${id}">\
         <div class="labels">\
           <span class="name">${dataset_list[id].display_name}</span>\
-          <span class="value value_${id}">1,234</span>\
+          <span class="value value_${id}">-</span>\
           <span class="unit">${dataset_list[id].unit}</span>\
         </div>\
         <div class="chart">\
@@ -81,7 +81,7 @@ function Get_Initial_Settings(provided_setting_dict) {
       <div class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
         <span class="name">${dataset_list[id].display_name}</span>\
         <br>\
-        <span class="value value_${id}">1,234</span>\
+        <span class="value value_${id}">-</span>\
         <span class="unit">${dataset_list[id].unit}</span>\
       </div>\
       `;
