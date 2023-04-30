@@ -1,3 +1,4 @@
+// グローバル変数
 let dataset_list = {};
 let general_settings = {};
 let is_received_initial_settings = false;
@@ -9,9 +10,266 @@ let large_chart_obj = undefined;
 let is_allow_all_graph_update = true;
 let typingIntervals = {};
 
+// グローバル変数ここまで
+
+// その他関数
+
 function show_error(e) {
   console.error(e);
 }
+
+function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
+  if (typingIntervals[element]) {
+    clearInterval(typingIntervals[element]);
+    delete typingIntervals[element];
+  }
+  if (is_clear) {
+    element.textContent = "";
+  }
+  let cursor = 0;
+  typingIntervals[element] = setInterval(() => {
+    element.textContent += text.charAt(cursor);
+    cursor++;
+    if (cursor === text.length) {
+      clearInterval(typingIntervals[element]);
+    }
+  }, interval_ms);
+}
+
+// その他関数ここまで
+
+// グラフ描画
+
+eel.expose(Data_PY2JS);
+function Data_PY2JS(data) {
+  // Receive data from python (update data)
+  try {
+    unix_before_data_updated = new Date().getTime();
+    if (!is_received_initial_settings) {
+      return;
+    }
+
+    // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
+    let is_interval_update_graph = false;
+    if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
+      is_interval_update_graph = true;
+      unix_before_graph_updated = new Date().getTime();
+    }
+
+    if (now_focus_graph_id != "all" && is_allow_all_graph_update) {
+      large_chart_obj.update();
+    }
+
+    Object.keys(data).forEach(function (id) {
+      if (Object.keys(dataset_list).includes(id)) {
+        let new_data = data[id];
+        dataset_list[id].data.push(new_data);
+        dataset_list[id].chart_obj.data.labels.push("");
+
+        if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
+          dataset_list[id].data.shift();
+          dataset_list[id].chart_obj.data.labels.shift();
+        }
+
+        var is_display_all_graphs = "all" == now_focus_graph_id;
+        if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
+          dataset_list[id].chart_obj.update();
+        }
+
+        if (is_interval_update_graph) {
+          Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
+            var before_value = parseFloat(element.textContent);
+
+            // 値が変わったら色を変える
+            if (before_value > new_data) {
+              element.setAttribute("style", "background-color:rgba(255,0,0,0.075);");
+            } else if (before_value < new_data) {
+              element.setAttribute("style", "background-color:rgba(0,0,255,0.075);");
+            }
+
+            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3桁ごとカンマ 小数点第2位まで表示
+          });
+        }
+
+        Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
+          if (dataset_list[id].safe_range_max < new_data) {
+            element.classList.add("danger");
+            element.classList.remove("safe");
+          } else if (dataset_list[id].safe_range_min > new_data) {
+            element.classList.add("danger");
+            element.classList.remove("safe");
+          } else {
+            element.classList.remove("danger");
+            element.classList.add("safe");
+          }
+        });
+      }
+    });
+  } catch (e) {
+    show_error(e);
+  }
+}
+
+function focus_graph_to(id) {
+  if (id == now_focus_graph_id) {
+    return;
+  }
+
+  document.getElementsByClassName(`indicator_${id}`)[0].setAttribute("style", "border-color: black;");
+  document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].setAttribute("style", "border-color: transparent;");
+
+  let is_switch_all2large = !((id == "all" && now_focus_graph_id == "all") || (id != "all" && now_focus_graph_id != "all"));
+  if (is_switch_all2large) {
+    if (id == "all") {
+      // large_graphを非表示にして、グラフ一覧を表示する
+      document.getElementById("graphs").setAttribute("style", "display: flex;");
+      document.getElementById("large_graphs").setAttribute("style", "display: none;");
+    } else if (now_focus_graph_id == "all") {
+      // グラフ一覧を非表示にして、large_graphを表示する
+      document.getElementById("graphs").setAttribute("style", "display: none;");
+      document.getElementById("large_graphs").setAttribute("style", "display: block;  width: 80%;");
+    }
+  }
+
+  if (id != "all") {
+    // large_graphに情報を表示する
+    document.getElementById("large_graphs_display_name").textContent = general_settings.data_list[id].display_name;
+    if (large_chart_obj) {
+      large_chart_obj.destroy();
+    }
+    large_chart_obj = new Chart(document.getElementById("large_graphs_chart_focus").getContext("2d"), {
+      type: "line",
+      data: {
+        labels: dataset_list[id].chart_obj.data.labels,
+        datasets: [
+          {
+            label: "Value",
+            data: dataset_list[id].data,
+            fill: true,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            borderWidth: 1,
+            borderColor: "rgb(255, 99, 132)",
+          },
+        ],
+      },
+      options: {
+        pointRadius: 0,
+        animation: {
+          duration: 0,
+        },
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          x: {
+            // min: 0,
+            // max: general_settings.interface.graph_max_display,
+            display: true,
+          },
+          y: {
+            // min: 0,
+            // max: 100,
+            display: true,
+          },
+        },
+      },
+    });
+    if (is_allow_all_graph_update) {
+      large_chart_obj.update();
+    }
+  }
+
+  now_focus_graph_id = id;
+}
+
+function add_timestamp_insert(unix) {
+  const parent = document.getElementById("timestamp_insert");
+  try {
+    const new_html = ``;
+  } catch (e) {
+    show_error(e);
+  }
+}
+
+function timestamp_onchange() {
+  // console.log(document.getElementById("1").value);
+}
+
+// グラフ描画ここまで
+
+// ヘッダー
+function on_clicked_header_button(comment) {
+  try {
+    function hide_container() {
+      var container = document.getElementById("main").children;
+      for (var i = 0; i < container.length; i++) {
+        container[i].style.display = "none";
+      }
+      var container = document.getElementById("header_buttons").children;
+      for (var i = 0; i < container.length; i++) {
+        container[i].classList.remove("displayed");
+      }
+      window.scroll({ top: 0, behavior: "instant" });
+    }
+    if ("bar_hide" == comment) {
+      document.getElementById("header_on_hidden").style.display = "flex";
+      document.getElementById("header_on_shown").style.display = "none";
+      document.getElementById("main").setAttribute("style", "margin-top:20px;");
+    }
+    if ("bar_show" == comment) {
+      document.getElementById("header_on_hidden").style.display = "none";
+      document.getElementById("header_on_shown").style.display = "flex";
+      document.getElementById("main").setAttribute("style", "margin-top:45px;");
+    }
+    if ("show_graphs" == comment) {
+      is_allow_all_graph_update = true;
+      hide_container();
+      document.getElementById("header_show_graphs").classList.add("displayed");
+      document.getElementById("main_graphs").setAttribute("style", "display:flex;");
+    }
+    if ("show_connection" == comment) {
+      is_allow_all_graph_update = false;
+      hide_container();
+      document.getElementById("header_show_connection").classList.add("displayed");
+      document.getElementById("main_connection_settings").setAttribute("style", "display:flex;");
+    }
+
+    if ("show_settings" == comment) {
+      is_allow_all_graph_update = false;
+      hide_container();
+      document.getElementById("header_show_settings").classList.add("displayed");
+      document.getElementById("main_display_settings").setAttribute("style", "display:flex;");
+    }
+  } catch {
+    show_error(e);
+  }
+}
+
+eel.expose(add_remove_notification);
+function add_remove_notification(is_add, id, initial, description) {
+  const parent = document.getElementById("header_notifications");
+  if (is_add) {
+    let new_notification = document.createElement("div");
+    new_notification.classList.add("notification_icon");
+    new_notification.setAttribute("id", `notification_${id}`);
+    new_notification.innerHTML = `
+    <div class="notification_icon">
+      <div class="notification_initial">${initial}</div>
+      <div class="notification_popup">${description}</div>
+    </div>
+  `;
+    parent.appendChild(new_notification);
+  } else {
+    parent.removeChild(document.getElementById(`notification_${id}`));
+  }
+}
+
+// ヘッダーここまで
+
+// 初期起動時
 
 document.addEventListener("DOMContentLoaded", function () {
   try {
@@ -30,9 +288,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Receive data from python (initialize)
 eel.expose(Get_Initial_Settings);
 function Get_Initial_Settings(provided_setting_dict) {
+  // Receive data from python (initialize)
   try {
     console.log("Initialize start");
 
@@ -163,139 +421,25 @@ function Get_Initial_Settings(provided_setting_dict) {
   }
 }
 
-// Receive data from python (update data)
-eel.expose(Data_PY2JS);
-function Data_PY2JS(data) {
+// 初期起動時ここまで
+
+// Pythonとの接続
+
+eel.expose(progress_manager);
+function progress_manager(message) {
+  // Python側の関数を非同期で実行するとき、処理進捗を表示する
   try {
-    unix_before_data_updated = new Date().getTime();
-    if (!is_received_initial_settings) {
-      return;
+    if (message == "connection_list_update_started") {
+      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストをリセットしています。Bluetoothデバイスの検知には時間がかかります。しばらくお待ちください。", true);
+      is_now_updating_connection_list = true;
     }
-
-    // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
-    let is_interval_update_graph = false;
-    if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
-      is_interval_update_graph = true;
-      unix_before_graph_updated = new Date().getTime();
-    }
-
-    if (now_focus_graph_id != "all" && is_allow_all_graph_update) {
-      large_chart_obj.update();
-    }
-
-    Object.keys(data).forEach(function (id) {
-      if (Object.keys(dataset_list).includes(id)) {
-        let new_data = data[id];
-        dataset_list[id].data.push(new_data);
-        dataset_list[id].chart_obj.data.labels.push("");
-
-        if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
-          dataset_list[id].data.shift();
-          dataset_list[id].chart_obj.data.labels.shift();
-        }
-
-        var is_display_all_graphs = "all" == now_focus_graph_id;
-        if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
-          dataset_list[id].chart_obj.update();
-        }
-
-        if (is_interval_update_graph) {
-          Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
-            var before_value = parseFloat(element.textContent);
-
-            // 値が変わったら色を変える
-            if (before_value > new_data) {
-              element.setAttribute("style", "background-color:rgba(255,0,0,0.075);");
-            } else if (before_value < new_data) {
-              element.setAttribute("style", "background-color:rgba(0,0,255,0.075);");
-            }
-
-            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3桁ごとカンマ 小数点第2位まで表示
-          });
-        }
-
-        Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
-          if (dataset_list[id].safe_range_max < new_data) {
-            element.classList.add("danger");
-            element.classList.remove("safe");
-          } else if (dataset_list[id].safe_range_min > new_data) {
-            element.classList.add("danger");
-            element.classList.remove("safe");
-          } else {
-            element.classList.remove("danger");
-            element.classList.add("safe");
-          }
-        });
-      }
-    });
-  } catch (e) {
-    show_error(e);
-  }
-}
-
-// Header
-function on_clicked_header_button(comment) {
-  try {
-    function hide_container() {
-      var container = document.getElementById("main").children;
-      for (var i = 0; i < container.length; i++) {
-        container[i].style.display = "none";
-      }
-      var container = document.getElementById("header_buttons").children;
-      for (var i = 0; i < container.length; i++) {
-        container[i].classList.remove("displayed");
-      }
-      window.scroll({ top: 0, behavior: "instant" });
-    }
-    if ("bar_hide" == comment) {
-      document.getElementById("header_on_hidden").style.display = "flex";
-      document.getElementById("header_on_shown").style.display = "none";
-      document.getElementById("main").setAttribute("style", "margin-top:20px;");
-    }
-    if ("bar_show" == comment) {
-      document.getElementById("header_on_hidden").style.display = "none";
-      document.getElementById("header_on_shown").style.display = "flex";
-      document.getElementById("main").setAttribute("style", "margin-top:45px;");
-    }
-    if ("show_graphs" == comment) {
-      is_allow_all_graph_update = true;
-      hide_container();
-      document.getElementById("header_show_graphs").classList.add("displayed");
-      document.getElementById("main_graphs").setAttribute("style", "display:flex;");
-    }
-    if ("show_connection" == comment) {
-      is_allow_all_graph_update = false;
-      hide_container();
-      document.getElementById("header_show_connection").classList.add("displayed");
-      document.getElementById("main_connection_settings").setAttribute("style", "display:flex;");
-    }
-
-    if ("show_settings" == comment) {
-      is_allow_all_graph_update = false;
-      hide_container();
-      document.getElementById("header_show_settings").classList.add("displayed");
-      document.getElementById("main_display_settings").setAttribute("style", "display:flex;");
+    if (message == "connection_list_update_done") {
+      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストの更新が終わりました。ここで接続先デバイスを選ぶことができます。リストの更新には20秒程度かかります。", true);
+      is_now_updating_connection_list = false;
     }
   } catch {
     show_error(e);
   }
-}
-
-// Header end
-
-function add_timestamp_insert(unix) {
-  const parent = document.getElementById("timestamp_insert");
-  try {
-    const new_html = `\
-    
-      `;
-  } catch (e) {
-    show_error(e);
-  }
-}
-
-function timestamp_onchange() {
-  // console.log(document.getElementById("1").value);
 }
 
 eel.expose(window_alive_check);
@@ -314,81 +458,9 @@ setInterval(function () {
   }
 });
 
-function focus_graph_to(id) {
-  if (id == now_focus_graph_id) {
-    return;
-  }
+// Pythonとの接続ここまで
 
-  document.getElementsByClassName(`indicator_${id}`)[0].setAttribute("style", "border-color: black;");
-  document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].setAttribute("style", "border-color: transparent;");
-
-  let is_switch_all2large = !((id == "all" && now_focus_graph_id == "all") || (id != "all" && now_focus_graph_id != "all"));
-  if (is_switch_all2large) {
-    if (id == "all") {
-      // large_graphを非表示にして、グラフ一覧を表示する
-      document.getElementById("graphs").setAttribute("style", "display: flex;");
-      document.getElementById("large_graphs").setAttribute("style", "display: none;");
-    } else if (now_focus_graph_id == "all") {
-      // グラフ一覧を非表示にして、large_graphを表示する
-      document.getElementById("graphs").setAttribute("style", "display: none;");
-      document.getElementById("large_graphs").setAttribute("style", "display: block;  width: 80%;");
-    }
-  }
-
-  if (id != "all") {
-    // large_graphに情報を表示する
-    document.getElementById("large_graphs_display_name").textContent = general_settings.data_list[id].display_name;
-    if (large_chart_obj) {
-      large_chart_obj.destroy();
-    }
-    large_chart_obj = new Chart(document.getElementById("large_graphs_chart_focus").getContext("2d"), {
-      type: "line",
-      data: {
-        labels: dataset_list[id].chart_obj.data.labels,
-        datasets: [
-          {
-            label: "Value",
-            data: dataset_list[id].data,
-            fill: true,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
-            borderWidth: 1,
-            borderColor: "rgb(255, 99, 132)",
-          },
-        ],
-      },
-      options: {
-        pointRadius: 0,
-        animation: {
-          duration: 0,
-        },
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-        scales: {
-          x: {
-            // min: 0,
-            // max: general_settings.interface.graph_max_display,
-            display: true,
-          },
-          y: {
-            // min: 0,
-            // max: 100,
-            display: true,
-          },
-        },
-      },
-    });
-    if (is_allow_all_graph_update) {
-      large_chart_obj.update();
-    }
-  }
-
-  now_focus_graph_id = id;
-}
-
+// 接続先リスト
 eel.expose(reload_connection_list);
 function reload_connection_list(connection_list, clear_all = false) {
   const tbody = document.getElementById("main_connection_settings").getElementsByTagName("tbody")[0];
@@ -430,10 +502,33 @@ function reload_connection_list(connection_list, clear_all = false) {
     });
   }
 }
+
 function on_reset_connection_list_button_pushed() {
   if (is_now_updating_connection_list == false) {
     reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
     eel.get_device_list();
+  }
+}
+
+// 接続先リストここまで
+
+// 設定画面
+
+function apply_new_settings() {
+  try {
+    const settings_table = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
+    const settings_table_body = settings_table.getElementsByTagName("tbody")[0];
+    const settings_table_body_trs = settings_table_body.getElementsByTagName("tr");
+    Array.from(settings_table_body_trs).forEach((tr) => {
+      var variable_id = tr.getElementsByTagName("td")[0].textContent;
+      var variable_value = tr.getElementsByTagName("input")[0].value;
+      var variable_id_parent = variable_id.split(".")[0];
+      var variable_id_child = variable_id.split(".")[1];
+      general_settings[variable_id_parent][variable_id_child] = variable_value;
+    });
+    insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);
+  } catch {
+    show_error(e);
   }
 }
 
@@ -454,74 +549,4 @@ function change_dark_mode(change_to = "") {
   }
 }
 
-function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
-  if (typingIntervals[element]) {
-    clearInterval(typingIntervals[element]);
-    delete typingIntervals[element];
-  }
-  if (is_clear) {
-    element.textContent = "";
-  }
-  let cursor = 0;
-  typingIntervals[element] = setInterval(() => {
-    element.textContent += text.charAt(cursor);
-    cursor++;
-    if (cursor === text.length) {
-      clearInterval(typingIntervals[element]);
-    }
-  }, interval_ms);
-}
-
-eel.expose(progress_manager);
-function progress_manager(message) {
-  // Python側の関数を非同期で実行するとき、処理進捗を表示する
-  try {
-    if (message == "connection_list_update_started") {
-      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストをリセットしています。Bluetoothデバイスの検知には時間がかかります。しばらくお待ちください。", true);
-      is_now_updating_connection_list = true;
-    }
-    if (message == "connection_list_update_done") {
-      insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストの更新が終わりました。ここで接続先デバイスを選ぶことができます。リストの更新には20秒程度かかります。", true);
-      is_now_updating_connection_list = false;
-    }
-  } catch {
-    show_error(e);
-  }
-}
-
-function apply_new_settings() {
-  try {
-    const settings_table = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
-    const settings_table_body = settings_table.getElementsByTagName("tbody")[0];
-    const settings_table_body_trs = settings_table_body.getElementsByTagName("tr");
-    Array.from(settings_table_body_trs).forEach((tr) => {
-      var variable_id = tr.getElementsByTagName("td")[0].textContent;
-      var variable_value = tr.getElementsByTagName("input")[0].value;
-      var variable_id_parent = variable_id.split(".")[0];
-      var variable_id_child = variable_id.split(".")[1];
-      general_settings[variable_id_parent][variable_id_child] = variable_value;
-    });
-    insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);
-  } catch {
-    show_error(e);
-  }
-}
-
-eel.expose(add_remove_notification);
-function add_remove_notification(is_add, id, initial, description) {
-  const parent = document.getElementById("header_notifications");
-  if (is_add) {
-    let new_notification = document.createElement("div");
-    new_notification.classList.add("notification_icon");
-    new_notification.setAttribute("id", `notification_${id}`);
-    new_notification.innerHTML = `
-    <div class="notification_icon">
-      <div class="notification_initial">${initial}</div>
-      <div class="notification_popup">${description}</div>
-    </div>
-  `;
-    parent.appendChild(new_notification);
-  } else {
-    parent.removeChild(document.getElementById(`notification_${id}`));
-  }
-}
+// 設定画面ここまで
