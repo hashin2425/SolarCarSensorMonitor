@@ -58,13 +58,13 @@
         },
       };
       const connection_list = {
-        COM0: { name: "通信ポート (COM0)", type: "serial", response: "None" },
-        COM1: { name: "通信ポート (COM1)", type: "serial", response: "None" },
-        COM2: { name: "通信ポート (COM2)", type: "serial", response: "None" },
-        "00:00:00:00:00:00": { name: "DEVICE0", type: "bluetooth", response: "None" },
-        "00:00:00:00:00:01": { name: "DEVICE1", type: "bluetooth", response: "None" },
-        "00:00:00:00:00:02": { name: "DEVICE2", type: "bluetooth", response: "None" },
-        "00:00:00:00:00:03": { name: "DEVICE3", type: "bluetooth", response: "None" },
+        COM0: { name: "通信ポート (COM0)", type: "Serial", response: "None", connected: false },
+        COM1: { name: "通信ポート (COM1)", type: "Serial", response: "None", connected: true },
+        COM2: { name: "通信ポート (COM2)", type: "Serial", response: "None", connected: false },
+        "00:00:00:00:00:00": { name: "DEVICE0", type: "Bluetooth", response: "None", connected: false },
+        "00:00:00:00:00:01": { name: "DEVICE1", type: "Bluetooth", response: "None", connected: false },
+        "00:00:00:00:00:02": { name: "DEVICE2", type: "Bluetooth", response: "None", connected: false },
+        "00:00:00:00:00:03": { name: "DEVICE3", type: "Bluetooth", response: "None", connected: false },
       };
 
       document.addEventListener("DOMContentLoaded", (event) => {

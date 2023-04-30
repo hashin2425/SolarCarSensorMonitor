@@ -26,6 +26,7 @@ $height_shown_header: 45px;
       position: fixed;
       background-color: $color2;
       color: $col_font_white;
+      z-index: 9999; //絶対に最前列に表示する
       div#header_on_shown {
         height: $height_shown_header;
         display: flex;
@@ -252,6 +253,18 @@ $height_shown_header: 45px;
               &:hover {
                 background-color: rgba(0, 0, 0, 0.1);
               }
+              &.disconnect {
+                background-color: rgba($color: $color3, $alpha: 0.5);
+              }
+              animation: _append 0.35s forwards;
+              @keyframes _append {
+                0% {
+                  opacity: 0;
+                }
+                100% {
+                  opacity: 1;
+                }
+              }
               td {
                 border-bottom: $color1 solid 1px;
                 padding-top: 5px;
@@ -369,6 +382,7 @@ $height_shown_header: 45px;
       }
       div.container_footer {
         // 共通コンポーネント：各画面のフッター部分
+        z-index: 9998; // ヘッダーの次に最前列に表示する
         width: 100%;
         background-color: $color2;
         position: fixed;

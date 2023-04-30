@@ -9,19 +9,27 @@
 
 ### マイコン側の出力
 
-`ValueName:Value\n`と出力することで、`ValueName`の値が`Value`であると送信できる。名前と数値の間は半角コロン`:`で区切る。
+`ValueName:Value\n`と出力することで、`ValueName`の値が`Value`であると送信できる。名前と数値の間は半角コロン`:`で区切る。`@\n`を送信することで、それまでに送信した値をグラフに反映できる。（このタイミングでログへの書き込みが行われる）
 
-以下は、方角センサーから取得した値を`direction`として送信するユースケースである。
+以下は、複数のセンサーから取得した値を`direction`として送信するユースケースである。
 
 ```cpp
-int direction_sensor_value = 180; // センサーから取得した値として使用する
-
+// コード例
 void setup() {
   Serial.begin(9600);
 }
 
 void loop() {
+  // センサーから取得した値として使用する
+  int thermal_sensor_value = 25;
+  int direction_sensor_value = 180;
+  int speed_sensor_value = 60;
+
+  Serial.println("temperature:" + String(thermal_sensor_value));
   Serial.println("direction:" + String(direction_sensor_value));
+  Serial.println("speed:" + String(speed_sensor_value));
+
+  Serial.println("@"); // グラフ更新
   delay(1000);
 }
 ```

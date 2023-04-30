@@ -297,6 +297,11 @@ function timestamp_onchange() {
   // console.log(document.getElementById("1").value);
 }
 
+eel.expose(window_alive_check);
+function window_alive_check() {
+  unix_before_data_updated = new Date().getTime();
+}
+
 setInterval(function () {
   const timeout_ms = 3000;
   // console.log(new Date().getTime() - unix_before_data_updated);
@@ -391,22 +396,36 @@ function reload_connection_list(connection_list, clear_all = false) {
   }
   if (connection_list != undefined) {
     Object.keys(connection_list).forEach((id) => {
-      tbody.innerHTML += `
-      <tr>
-        <td class="info">
-          <div class="name">${connection_list[id].name}</div>
-          <div class="type">${connection_list[id].type}</div>
-          <div class="address">${id}</div>
-          <div class="connection_button">接続する</div>
-        </td>
-        <td class="preview">
-          <div class="raw_received_label">受信結果</div>
-          <div class="raw_received">
-            ${connection_list[id].response}
-          </div>
-        </td>
-      </tr>
-    `;
+      var new_tr = document.createElement("tr");
+      if (connection_list[id].connected === true) {
+        new_tr.classList.add("disconnect")
+        new_tr.innerHTML += `
+          <td class="info">
+            <div class="name">*${connection_list[id].name}</div>
+            <div class="type">${connection_list[id].type}（接続済み）</div>
+            <div class="address">${id}</div>
+            <div class="connection_button disconnect" onclick="eel.connect_device('**disconnect**');">接続を解除する</div>
+          </td>
+          <td class="preview">
+            <div class="raw_received_label">受信結果</div>
+            <div class="raw_received">${connection_list[id].response}</div>
+          </td>
+        `;
+      } else if (connection_list[id].connected === false) {
+        new_tr.innerHTML += `
+          <td class="info">
+            <div class="name">${connection_list[id].name}</div>
+            <div class="type">${connection_list[id].type}</div>
+            <div class="address">${id}</div>
+            <div class="connection_button connect" onclick="eel.connect_device('${id}');">接続する</div>
+          </td>
+          <td class="preview">
+            <div class="raw_received_label">受信結果</div>
+            <div class="raw_received">${connection_list[id].response}</div>
+          </td>
+        `;
+      }
+      tbody.appendChild(new_tr);
     });
   }
 }

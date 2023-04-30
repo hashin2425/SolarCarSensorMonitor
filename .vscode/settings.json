@@ -6,7 +6,9 @@
         "onefile",
         "pybluez2",
         "pyserial",
-        "RFCOMM"
+        "RFCOMM",
+        "chartjs",
+        "println"
     ],
     "editor.formatOnSave": true,
     // Python

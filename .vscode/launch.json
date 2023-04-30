@@ -12,7 +12,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--DisableBackGroundLogging", // ログファイルの出力を停止。ウィンドウ終了時のロギングを停止。
-                "--UseDummyData" // ダミーデータを使用。
+                "--UseDummyData", // ダミーデータを使用。
+                "--DebugPrint" // デバッグ用に変数などをPrintする
             ],
             "justMyCode": true
         },
@@ -26,7 +27,8 @@
                 "profile.prof", // プロファイルを出力する。
                 "mainrun.py",
                 "--DisableBackGroundLogging", // ログファイルの出力を停止。ウィンドウ終了時のロギングを停止。
-                "--UseDummyData" // ダミーデータを使用。
+                "--UseDummyData", // ダミーデータを使用。
+                "--DebugPrint" // デバッグ用に変数などをPrintする
             ],
             "justMyCode": true
         }
