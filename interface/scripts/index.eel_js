@@ -245,6 +245,7 @@ function on_clicked_header_button(comment) {
       for (var i = 0; i < container.length; i++) {
         container[i].classList.remove("displayed");
       }
+      window.scroll({ top: 0, behavior: "instant" });
     }
     if ("bar_hide" == comment) {
       document.getElementById("header_on_hidden").style.display = "flex";
