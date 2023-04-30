@@ -124,6 +124,7 @@ class Connection:
         for key, dic in device_dict.items():
             if key != self.connect_to_id:
                 eel.reload_connection_list({key: dic}, False)  # type:ignore
+        eel.add_remove_notification(True, "CONNECTION_ESTABLISHED", "C", "接続が成功しました。")  # type: ignore
 
     def kill_connection(self) -> None:
         self.is_enabled_connection = False
@@ -135,6 +136,7 @@ class Connection:
         # Bluetooth
         elif self.connection_type == "Bluetooth":
             self.connection_bluetooth.close()
+        eel.add_remove_notification(False, "CONNECTION_ESTABLISHED", "C", "接続が成功しました。")  # type: ignore
 
     def connection_observer(self) -> None:
         SEPARATE_NAME_VALUE = ":"
@@ -310,15 +312,24 @@ def _print(*args):
 
 # ---- その他関数類ここまで ----
 
+# eel.init("interface") # 起動時にかかる時間の82％が費やされる
+# allowed_extensions=["eel_js"]によって、起動時の処理時間を1~2秒短縮できる。
+# 内部ではinterfaceディレクトリの解析が行われており、余計なスクリプトファイルを除外して解析することによって処理時間が短縮される。
+# PythonでJavaScriptの関数を呼び出す前にinitを実行しないといけない
+eel.init("interface", allowed_extensions=["eel_js"])
+
 # ---- Args ----
 # --DisableBackGroundLogging : ログファイルの生成を停止する。デバッグ用
 IS_DISABLED_BACKGROUND_LOGGING = "--DisableBackGroundLogging" in sys.argv
+eel.add_remove_notification(IS_DISABLED_BACKGROUND_LOGGING, "IS_DISABLED_BACKGROUND_LOGGING", "L", "[デバッグ機能]ログファイルの生成が停止されています。")  # type: ignore
 #
-# --UseDummyData : ログファイルの生成を停止する。デバッグ用
+# --UseDummyData : ダミーのデバイスを利用できる。デバッグ用
 IS_USE_DUMMY_DATA = "--UseDummyData" in sys.argv
+eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デバッグ機能]ダミーデバイスが有効です。")  # type: ignore
 #
 # --DebugPrint : デバッグモード有効時にのみPrintする。デバッグ用
 DEBUG_PRINT_MODE = "--DebugPrint" in sys.argv
+eel.add_remove_notification(DEBUG_PRINT_MODE, "DEBUG_PRINT_MODE", "P", "[デバッグ機能]デバッグ情報がコンソールに出力されます。")  # type: ignore
 #
 _print("Args:", sys.argv)
 # ---- Argsここまで ----
@@ -327,12 +338,6 @@ if __name__ == "__main__":
     # CSVファイルの保存先ディレクトリを生成
     if not os.path.exists(INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"]):
         os.mkdir(INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"])
-
-    # eel.init("interface") # 起動時にかかる時間の82％が費やされる
-    # allowed_extensions=["eel_js"]によって、起動時の処理時間を1~2秒短縮できる。
-    # 内部ではinterfaceディレクトリの解析が行われており、余計なスクリプトファイルを除外して解析することによって処理時間が短縮される。
-    # PythonでJavaScriptの関数を呼び出す前にinitを実行しないといけない
-    eel.init("interface", allowed_extensions=["eel_js"])
 
     # load setting.json
     for k in INITIAL_SETTINGS["values"]["data_list"]:

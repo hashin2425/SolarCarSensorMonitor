@@ -398,7 +398,7 @@ function reload_connection_list(connection_list, clear_all = false) {
     Object.keys(connection_list).forEach((id) => {
       var new_tr = document.createElement("tr");
       if (connection_list[id].connected === true) {
-        new_tr.classList.add("disconnect")
+        new_tr.classList.add("disconnect");
         new_tr.innerHTML += `
           <td class="info">
             <div class="name">*${connection_list[id].name}</div>
@@ -503,5 +503,24 @@ function apply_new_settings() {
     insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);
   } catch {
     show_error(e);
+  }
+}
+
+eel.expose(add_remove_notification);
+function add_remove_notification(is_add, id, initial, description) {
+  const parent = document.getElementById("header_notifications");
+  if (is_add) {
+    let new_notification = document.createElement("div");
+    new_notification.classList.add("notification_icon");
+    new_notification.setAttribute("id", `notification_${id}`);
+    new_notification.innerHTML = `
+    <div class="notification_icon">
+      <div class="notification_initial">${initial}</div>
+      <div class="notification_popup">${description}</div>
+    </div>
+  `;
+    parent.appendChild(new_notification);
+  } else {
+    parent.removeChild(document.getElementById(`notification_${id}`));
   }
 }
