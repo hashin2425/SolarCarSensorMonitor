@@ -139,33 +139,51 @@ class Connection:
         eel.add_remove_notification(False, "CONNECTION_ESTABLISHED", "C", "接続が成功しました。")  # type: ignore
 
     def connection_observer(self) -> None:
+        """
+        Observes the connection and receives data from the device. If using dummy data,
+        generates random data. If using serial or bluetooth, reads data from the connection.
+        Parses the received text and updates the latest data dictionary.
+
+        Returns:
+            None
+        """
         SEPARATE_NAME_VALUE = ":"
         SEPARATE_VALUE_VALUE = "\n"
         SEPARATE_EACH_UPDATE = "@"
+
         while self.is_enabled_connection:
             eel.sleep(0.05)
             data = ""
-            # 最新のデータを取得
+
+            # Get the latest data
             if self.connection_type == "DummyPort":
-                # ダミーデータを使うオプションが有効のとき、ランダムなデータを強制で使用する。
+                # If using dummy data, generate random data
                 eel.sleep(random.random() / 5)
                 for key in latest_data_dict:
                     latest_data_dict[key] = max(0, latest_data_dict[key] + int((random.random() * 10) - 5))
                 data = SEPARATE_VALUE_VALUE.join([f"{key}{SEPARATE_NAME_VALUE}{value}" for key, value in latest_data_dict.items()]) + SEPARATE_EACH_UPDATE
             elif self.connection_type == "Serial":
-                data = self.connection_serial.read(999999).decode("utf-8")  # 999999byteまで取得 # 処理に0.5～1秒くらいかかる？
+                # If using serial, read data from the connection
+                data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
             elif self.connection_type == "Bluetooth":
+                # If using bluetooth, read data from the connection
                 data = self.connection_bluetooth.recv(1024).decode("utf-8")
-            # データを送信
+
+            # Send the data
             if len(data) > 0:
                 self.received_text += data
+
             if SEPARATE_EACH_UPDATE in self.received_text:
+                # Parse the received text
                 parsed_text = [dict([x.split(SEPARATE_NAME_VALUE) for x in y.split(SEPARATE_VALUE_VALUE) if SEPARATE_NAME_VALUE in x]) for y in self.received_text.split(SEPARATE_EACH_UPDATE)]
                 if len(parsed_text) > 0:
+                    # Update the latest data dictionary
                     new_data_dict = {key: int(value) for key, value in parsed_text[0].items()}
                     new_data_dict.update(latest_data_dict)
                     eel.Data_PY2JS(latest_data_dict)  # type: ignore
+
                     if not IS_DISABLED_BACKGROUND_LOGGING:
+                        # Log the latest data
                         with open(logging_filename, mode="a", encoding="UTF-8") as file:
                             new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "\n"
                             file.write(new_line)
