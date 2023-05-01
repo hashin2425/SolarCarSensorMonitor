@@ -19,13 +19,26 @@ function show_error(e) {
 }
 
 function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
+  /**
+   * Inserts text into an element as if it is being typed, with an optional clearing of the element's previous text.
+   *
+   * @param {HTMLElement} element - The element to insert the text into.
+   * @param {string} text - The text to be inserted.
+   * @param {boolean} [is_clear=false] - Whether or not to clear the element's previous text. Defaults to false.
+   * @param {number} [interval_ms=25] - The interval in milliseconds between each character being typed. Defaults to 25.
+   */
+  // Clear any existing typing interval for this element
   if (typingIntervals[element]) {
     clearInterval(typingIntervals[element]);
     delete typingIntervals[element];
   }
+
+  // Clear the element's text if specified
   if (is_clear) {
     element.textContent = "";
   }
+
+  // Start typing the text
   let cursor = 0;
   typingIntervals[element] = setInterval(() => {
     element.textContent += text.charAt(cursor);
@@ -39,58 +52,72 @@ function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25
 // その他関数ここまで
 
 // グラフ描画
-
 eel.expose(Data_PY2JS);
 function Data_PY2JS(data) {
-  // Receive data from python (update data)
+  /**
+   * Update chart data with new data received from Python backend
+   * @param {Object} data - Data received from Python backend
+   */
   try {
+    // Get current time in Unix format
     unix_before_data_updated = new Date().getTime();
+
+    // If initial settings not received yet, return
     if (!is_received_initial_settings) {
       return;
     }
 
-    // 前回のグラフ更新から一定時間が経たないとグラフが更新しない（描画処理の負荷軽減）
+    // Check if it's time to update the graph (to reduce rendering load)
     let is_interval_update_graph = false;
     if (new Date().getTime() - unix_before_graph_updated > general_settings.interface.update_interval_sec * 1000) {
       is_interval_update_graph = true;
       unix_before_graph_updated = new Date().getTime();
     }
 
+    // If currently focused on a specific graph and all graph update allowed, update large chart
     if (now_focus_graph_id != "all" && is_allow_all_graph_update) {
       large_chart_obj.update();
     }
 
+    // Iterate through received data
     Object.keys(data).forEach(function (id) {
+      // If received data is for an existing dataset
       if (Object.keys(dataset_list).includes(id)) {
+        // Add new data to dataset
         let new_data = data[id];
         dataset_list[id].data.push(new_data);
         dataset_list[id].chart_obj.data.labels.push("");
 
+        // If dataset has exceeded max display limit, remove oldest data point
         if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
           dataset_list[id].data.shift();
           dataset_list[id].chart_obj.data.labels.shift();
         }
 
+        // Check if it's time to update all graphs and update if necessary
         var is_display_all_graphs = "all" == now_focus_graph_id;
         if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
           dataset_list[id].chart_obj.update();
         }
 
+        // Check if it's time to update graph indicators and update if necessary
         if (is_interval_update_graph) {
           Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
             var before_value = parseFloat(element.textContent);
 
-            // 値が変わったら色を変える
+            // Change color if value has changed
             if (before_value > new_data) {
               element.setAttribute("style", "background-color:rgba(255,0,0,0.075);");
             } else if (before_value < new_data) {
               element.setAttribute("style", "background-color:rgba(0,0,255,0.075);");
             }
 
-            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3桁ごとカンマ 小数点第2位まで表示
+            // Update displayed value
+            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3-digit comma separator, display up to 2 decimal places
           });
         }
 
+        // Update graph indicators to reflect safe range
         Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
           if (dataset_list[id].safe_range_max < new_data) {
             element.classList.add("danger");
@@ -111,32 +138,45 @@ function Data_PY2JS(data) {
 }
 
 function focus_graph_to(id) {
+  /**
+   * This function focuses the graph to the specified id.
+   * It updates the view to highlight the selected graph and display information about it.
+   *
+   * @param {string} id - the id of the graph to focus on
+   */
+  // if the selected graph is already in focus, return without doing anything
   if (id == now_focus_graph_id) {
     return;
   }
 
+  // highlight the selected graph's indicator and remove the highlight from the previously focused graph's indicator
   document.getElementsByClassName(`indicator_${id}`)[0].setAttribute("style", "border-color: black;");
   document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].setAttribute("style", "border-color: transparent;");
 
+  // determine whether to switch from displaying all graphs to displaying a single large graph or vice versa
   let is_switch_all2large = !((id == "all" && now_focus_graph_id == "all") || (id != "all" && now_focus_graph_id != "all"));
   if (is_switch_all2large) {
     if (id == "all") {
-      // large_graphを非表示にして、グラフ一覧を表示する
+      // hide the large graph and show the graph list
       document.getElementById("graphs").setAttribute("style", "display: flex;");
       document.getElementById("large_graphs").setAttribute("style", "display: none;");
     } else if (now_focus_graph_id == "all") {
-      // グラフ一覧を非表示にして、large_graphを表示する
+      // hide the graph list and show the large graph
       document.getElementById("graphs").setAttribute("style", "display: none;");
       document.getElementById("large_graphs").setAttribute("style", "display: block;  width: 80%;");
     }
   }
 
   if (id != "all") {
-    // large_graphに情報を表示する
+    // display information about the selected graph in the large graph view
     document.getElementById("large_graphs_display_name").textContent = general_settings.data_list[id].display_name;
+
+    // destroy the previous chart object for the large graph, if there was one
     if (large_chart_obj) {
       large_chart_obj.destroy();
     }
+
+    // create a new chart object for the large graph
     large_chart_obj = new Chart(document.getElementById("large_graphs_chart_focus").getContext("2d"), {
       type: "line",
       data: {
@@ -177,11 +217,14 @@ function focus_graph_to(id) {
         },
       },
     });
+
+    // if allowed, update the large graph
     if (is_allow_all_graph_update) {
       large_chart_obj.update();
     }
   }
 
+  // update the currently focused graph id
   now_focus_graph_id = id;
 }
 
@@ -202,8 +245,16 @@ function timestamp_onchange() {
 
 // ヘッダー
 function on_clicked_header_button(comment) {
+  /**
+   * This function handles the click events of the header buttons.
+   *
+   * @param {string} comment - The comment associated with the clicked button
+   */
   try {
     function hide_container() {
+      /**
+       * This function hides all the containers except the header and scrolls to the top of the page.
+       */
       var container = document.getElementById("main").children;
       for (var i = 0; i < container.length; i++) {
         container[i].style.display = "none";
@@ -214,22 +265,26 @@ function on_clicked_header_button(comment) {
       }
       window.scroll({ top: 0, behavior: "instant" });
     }
+    // Show the hidden bar
     if ("bar_hide" == comment) {
       document.getElementById("header_on_hidden").style.display = "flex";
       document.getElementById("header_on_shown").style.display = "none";
       document.getElementById("main").setAttribute("style", "margin-top:20px;");
     }
+    // Hide the hidden bar
     if ("bar_show" == comment) {
       document.getElementById("header_on_hidden").style.display = "none";
       document.getElementById("header_on_shown").style.display = "flex";
       document.getElementById("main").setAttribute("style", "margin-top:45px;");
     }
+    // Show the graphs
     if ("show_graphs" == comment) {
       is_allow_all_graph_update = true;
       hide_container();
       document.getElementById("header_show_graphs").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
     }
+    // Show the connection settings
     if ("show_connection" == comment) {
       is_allow_all_graph_update = false;
       hide_container();
@@ -237,32 +292,43 @@ function on_clicked_header_button(comment) {
       document.getElementById("main_connection_settings").setAttribute("style", "display:flex;");
     }
 
+    // Show the display settings
     if ("show_settings" == comment) {
       is_allow_all_graph_update = false;
       hide_container();
       document.getElementById("header_show_settings").classList.add("displayed");
       document.getElementById("main_display_settings").setAttribute("style", "display:flex;");
     }
-  } catch {
+  } catch (e) {
     show_error(e);
   }
 }
 
 eel.expose(add_remove_notification);
 function add_remove_notification(is_add, id, initial, description) {
+  /**
+   * Adds or removes a notification from the header.
+   * @param {boolean} is_add - Whether to add or remove the notification.
+   * @param {string} id - The ID of the notification.
+   * @param {string} initial - The initial to display on the notification.
+   * @param {string} description - The description to display on the notification.
+   */
   const parent = document.getElementById("header_notifications");
   if (is_add) {
+    // Create a new notification element with the given ID, initial, and description.
     let new_notification = document.createElement("div");
     new_notification.classList.add("notification_icon");
     new_notification.setAttribute("id", `notification_${id}`);
     new_notification.innerHTML = `
-    <div class="notification_icon">
-      <div class="notification_initial">${initial}</div>
-      <div class="notification_popup">${description}</div>
-    </div>
-  `;
+      <div class="notification_icon">
+        <div class="notification_initial">${initial}</div>
+        <div class="notification_popup">${description}</div>
+      </div>
+    `;
+    // Add the new notification element to the parent element.
     parent.appendChild(new_notification);
   } else {
+    // Remove the notification element with the given ID from the parent element.
     parent.removeChild(document.getElementById(`notification_${id}`));
   }
 }
@@ -278,8 +344,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Prevent page reload
     window.addEventListener("beforeunload", function (e) {
       // 開発時はコメントアウト
-      // e.preventDefault();
-      // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
+      e.preventDefault();
+      e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
 
     document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
@@ -290,13 +356,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 eel.expose(Get_Initial_Settings);
 function Get_Initial_Settings(provided_setting_dict) {
-  // Receive data from python (initialize)
+  /**
+   * Initializes the settings and UI of the web application.
+   * @param {Object} provided_setting_dict - A dictionary of initial settings.
+   */
   try {
     console.log("Initialize start");
 
+    // Copy provided settings to general_settings
     Object.keys(provided_setting_dict.values).forEach(function (id) {
       general_settings[id] = provided_setting_dict.values[id];
     });
+
     // Initialize dataset_list
     Object.keys(general_settings.data_list).forEach(function (id) {
       dataset_list[id] = general_settings.data_list[id];
@@ -304,7 +375,7 @@ function Get_Initial_Settings(provided_setting_dict) {
       dataset_list[id]["data"] = [];
     });
 
-    // change dark mode
+    // Change to dark mode if specified
     if (general_settings.interface.dark_mode) {
       change_dark_mode((change_to = "dark"));
     } else {
@@ -315,13 +386,14 @@ function Get_Initial_Settings(provided_setting_dict) {
     const containers = document.getElementById("graphs");
     const indicators = document.getElementById("indicators");
 
-    // 「すべてのグラフを表示する」ボタン挿入
+    // Insert "Show all graphs" button
     indicators.innerHTML += `\
       <div class="labels indicator indicator_all safe" onclick="focus_graph_to('all');" style="border-color: black;">\
         <span class="name">すべてのグラフを表示する</span>\
       </div>\
       `;
 
+    // Insert containers and indicators for each dataset
     Object.keys(dataset_list).forEach(function (id) {
       containers.innerHTML += `\
       <div class="container container_${id}">\
@@ -345,7 +417,7 @@ function Get_Initial_Settings(provided_setting_dict) {
       `;
     });
 
-    // Enable each graphs
+    // Enable each graph
     Object.keys(dataset_list).forEach(function (id) {
       let this_canvas = document.getElementById(`chart_${id}`).getContext("2d");
       dataset_list[id].chart_obj = new Chart(this_canvas, {
@@ -427,17 +499,27 @@ function Get_Initial_Settings(provided_setting_dict) {
 
 eel.expose(progress_manager);
 function progress_manager(message) {
-  // Python側の関数を非同期で実行するとき、処理進捗を表示する
+  /**
+   * Manages progress messages for async calls to Python functions.
+   * @param {string} message - The progress message to be displayed.
+   */
   try {
+    // If connection list update has started
     if (message == "connection_list_update_started") {
+      // Display message to user
       insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストをリセットしています。Bluetoothデバイスの検知には時間がかかります。しばらくお待ちください。", true);
+      // Set flag to indicate that connection list is being updated
       is_now_updating_connection_list = true;
     }
+    // If connection list update has completed
     if (message == "connection_list_update_done") {
+      // Display message to user
       insert_text_as_typing(document.getElementById("main_connection_settings").getElementsByClassName("message")[0], "接続リストの更新が終わりました。ここで接続先デバイスを選ぶことができます。リストの更新には20秒程度かかります。", true);
+      // Set flag to indicate that connection list update is complete
       is_now_updating_connection_list = false;
     }
-  } catch {
+  } catch (e) {
+    // If an error occurs, show the error message to user
     show_error(e);
   }
 }
@@ -463,13 +545,25 @@ setInterval(function () {
 // 接続先リスト
 eel.expose(reload_connection_list);
 function reload_connection_list(connection_list, clear_all = false) {
+  /**
+   * Reloads the connection list in the HTML table.
+   * @param {Object} connection_list - The list of connections to display.
+   * @param {boolean} [clear_all=false] - Whether to clear all connections before reloading.
+   */
+  // Get the table body element
   const tbody = document.getElementById("main_connection_settings").getElementsByTagName("tbody")[0];
+
+  // Clear all connections if requested
   if (clear_all) {
     tbody.innerHTML = "";
   }
+
+  // Add each connection to the table
   if (connection_list != undefined) {
     Object.keys(connection_list).forEach((id) => {
       var new_tr = document.createElement("tr");
+
+      // Add the appropriate class and elements based on the connection state
       if (connection_list[id].connected === true) {
         new_tr.classList.add("disconnect");
         new_tr.innerHTML += `
@@ -498,14 +592,26 @@ function reload_connection_list(connection_list, clear_all = false) {
           </td>
         `;
       }
+
+      // Add the new row to the table body
       tbody.appendChild(new_tr);
     });
   }
 }
 
 function on_reset_connection_list_button_pushed() {
+  /**
+   * This function is called when the reset connection list button is pushed.
+   * If the connection list is not currently being updated, it clears the list and
+   * makes a call to retrieve the device list.
+   */
+
+  // Check if the connection list is being updated
   if (is_now_updating_connection_list == false) {
-    reload_connection_list((connection_list = undefined), (clear_all = true)); // 接続リストをクリアする
+    // Clear the connection list
+    reload_connection_list((connection_list = undefined), (clear_all = true));
+
+    // Retrieve the device list
     eel.get_device_list();
   }
 }
@@ -515,24 +621,44 @@ function on_reset_connection_list_button_pushed() {
 // 設定画面
 
 function apply_new_settings() {
+  /**
+   * Applies new settings based on user input in the settings table
+   */
   try {
+    // Get the settings table and its body
     const settings_table = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0];
     const settings_table_body = settings_table.getElementsByTagName("tbody")[0];
+
+    // Get all the rows in the settings table body and loop through them
     const settings_table_body_trs = settings_table_body.getElementsByTagName("tr");
     Array.from(settings_table_body_trs).forEach((tr) => {
+      // Get the variable ID and value for the current row
       var variable_id = tr.getElementsByTagName("td")[0].textContent;
       var variable_value = tr.getElementsByTagName("input")[0].value;
+
+      // Split the variable ID into its parent and child parts
       var variable_id_parent = variable_id.split(".")[0];
       var variable_id_child = variable_id.split(".")[1];
+
+      // Update the corresponding value in the general_settings object
       general_settings[variable_id_parent][variable_id_child] = variable_value;
     });
+
+    // Display a success message
     insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);
-  } catch {
+  } catch (e) {
+    // Show an error message if an exception is caught
     show_error(e);
   }
 }
 
 function change_dark_mode(change_to = "") {
+  /**
+   * Toggles the dark mode on the HTML element.
+   *
+   * @param {string} change_to - Optional parameter to set the mode.
+   *                             Possible values: "dark", "light", "".
+   */
   const is_now_dark_mode = document.getElementsByTagName("html")[0].classList.contains("dark");
 
   const is_change_to_dark = change_to == "dark" || (change_to == "" && !is_now_dark_mode);
