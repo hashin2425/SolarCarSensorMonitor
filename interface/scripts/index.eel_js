@@ -52,7 +52,7 @@ function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25
 // その他関数ここまで
 
 // グラフ描画
-
+eel.expose(Data_PY2JS);
 function Data_PY2JS(data) {
   /**
    * Update chart data with new data received from Python backend
@@ -304,6 +304,7 @@ function on_clicked_header_button(comment) {
   }
 }
 
+eel.expose(add_remove_notification);
 function add_remove_notification(is_add, id, initial, description) {
   /**
    * Adds or removes a notification from the header.
