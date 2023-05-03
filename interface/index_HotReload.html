@@ -31,29 +31,43 @@
       // Iframeでindex.htmlを呼び出し、このコードから操作を行う。
       // LiveServerの利用を強く推奨する
       const dummy_settings = {
-        interface: {
-          update_interval_sec: 0.03,
-          graph_max_display: 50,
-          dark_mode: false,
+        description: {
+          interface: {
+            update_interval_sec: "グラフの描画間隔を指定します。数値を小さくすると、高頻度に更新されますが、端末の負荷が上昇します。単位は秒。",
+            graph_max_display: "グラフに表示するデータの数を指定します。単位は件数。",
+            dark_mode: "起動時のダークモードの有効/無効を指定します。",
+          },
+          data_logging: {
+            data_log_dir: "ロギングの保存先ファイル名を指定します。ソフトウェアのexeが存在するディレクトリ上にファイルを生成します。",
+            data_log_filename: "ロギングによって生成されたファイルの接頭辞を指定します。日時と拡張子が自動的に補完されます。例：log_20220101_1010.csv",
+          },
         },
-        data_list: {
-          dummy_0: {
-            display_name: "ダミー0",
-            unit: "V",
-            safe_range_min: -10000,
-            safe_range_max: 10000,
+        values: {
+          interface: {
+            update_interval_sec: 0.5,
+            graph_max_display: 100,
+            dark_mode: false,
           },
-          dummy_1: {
-            display_name: "ダミー1",
-            unit: "A",
-            safe_range_min: 999998,
-            safe_range_max: 999999,
-          },
-          dummy_2: {
-            display_name: "ダミー2",
-            unit: "km",
-            safe_range_min: -10000,
-            safe_range_max: 10000,
+          data_logging: { data_log_dir: "store", data_log_filename: "log" },
+          data_list: {
+            dummy_0: {
+              display_name: "ダミー0",
+              unit: "V",
+              safe_range_min: -10000,
+              safe_range_max: 10000,
+            },
+            dummy_1: {
+              display_name: "ダミー1",
+              unit: "A",
+              safe_range_min: 999998,
+              safe_range_max: 999999,
+            },
+            dummy_2: {
+              display_name: "ダミー2",
+              unit: "km",
+              safe_range_min: -10000,
+              safe_range_max: 10000,
+            },
           },
         },
       };
@@ -76,7 +90,7 @@
           // 定期動作時の処理
           setInterval(() => {
             let dummy_data = {};
-            Object.keys(dummy_settings.data_list).forEach((key) => {
+            Object.keys(dummy_settings.values.data_list).forEach((key) => {
               dummy_data[key] = Math.round(Math.sin(new Date().getTime() / 150) * 100);
             });
             document.getElementById("main_iframe").contentWindow.Data_PY2JS(dummy_data);
