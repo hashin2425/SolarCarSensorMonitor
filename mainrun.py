@@ -4,6 +4,7 @@ import re
 import os
 import sys
 import random
+import warnings
 from datetime import datetime as dt
 from threading import Thread
 
@@ -25,7 +26,6 @@ from serial.tools import list_ports
 from serial.serialutil import SerialException
 
 
-os.system("cls")
 latest_data_dict: dict = dict()  # 最新のデータのみを格納する
 device_dict: dict = dict()
 is_window_shown: bool = False
@@ -322,6 +322,7 @@ def load_JsonWithComment(path):
     return setting
 
 
+@eel.expose
 def _print(*args):
     # デバッグ用
     if DEBUG_PRINT_MODE:
@@ -348,7 +349,10 @@ eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デ�
 # --DebugPrint : デバッグモード有効時にのみPrintする。デバッグ用
 DEBUG_PRINT_MODE = "--DebugPrint" in sys.argv
 eel.add_remove_notification(DEBUG_PRINT_MODE, "DEBUG_PRINT_MODE", "P", "[デバッグ機能]デバッグ情報がコンソールに出力されます。")  # type: ignore
+if not DEBUG_PRINT_MODE:
+    warnings.simplefilter("ignore")
 #
+os.system("cls")
 _print("Args:", sys.argv)
 # ---- Argsここまで ----
 
