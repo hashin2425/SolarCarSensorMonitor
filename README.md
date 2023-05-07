@@ -58,6 +58,8 @@ Python スクリプトとして実行するほうが望ましい。
 
 ### PyInstaller を使う
 
+`\bats\Compile_asEXE.bat`を実行してください。
+
 - `.\.venv\Scripts\python.exe -m eel mainrun.py interface --onefile --icon=interface/favicon.ico --clean --name=SolarCarSensorMonitor`を実行する。
   - `--onefile`：ひとつのファイルに纏める。圧縮が行われるため、容量が小さくなるが、起動に時間がかかる
   - `--icon=something.ico`：EXE ファイルのアイコンを指定する。ファイル形式は`.ico`のみ。
