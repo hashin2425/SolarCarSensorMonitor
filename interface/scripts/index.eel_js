@@ -19,34 +19,38 @@ function show_error(e) {
 }
 
 function insert_text_as_typing(element, text, is_clear = false, interval_ms = 25) {
-  /**
-   * Inserts text into an element as if it is being typed, with an optional clearing of the element's previous text.
-   *
-   * @param {HTMLElement} element - The element to insert the text into.
-   * @param {string} text - The text to be inserted.
-   * @param {boolean} [is_clear=false] - Whether or not to clear the element's previous text. Defaults to false.
-   * @param {number} [interval_ms=25] - The interval in milliseconds between each character being typed. Defaults to 25.
-   */
-  // Clear any existing typing interval for this element
-  if (typingIntervals[element]) {
-    clearInterval(typingIntervals[element]);
-    delete typingIntervals[element];
-  }
-
-  // Clear the element's text if specified
-  if (is_clear) {
-    element.textContent = "";
-  }
-
-  // Start typing the text
-  let cursor = 0;
-  typingIntervals[element] = setInterval(() => {
-    element.textContent += text.charAt(cursor);
-    cursor++;
-    if (cursor === text.length) {
+  try {
+    /**
+     * Inserts text into an element as if it is being typed, with an optional clearing of the element's previous text.
+     *
+     * @param {HTMLElement} element - The element to insert the text into.
+     * @param {string} text - The text to be inserted.
+     * @param {boolean} [is_clear=false] - Whether or not to clear the element's previous text. Defaults to false.
+     * @param {number} [interval_ms=25] - The interval in milliseconds between each character being typed. Defaults to 25.
+     */
+    // Clear any existing typing interval for this element
+    if (typingIntervals[element]) {
       clearInterval(typingIntervals[element]);
+      delete typingIntervals[element];
     }
-  }, interval_ms);
+
+    // Clear the element's text if specified
+    if (is_clear) {
+      element.textContent = "";
+    }
+
+    // Start typing the text
+    let cursor = 0;
+    typingIntervals[element] = setInterval(() => {
+      element.textContent += text.charAt(cursor);
+      cursor++;
+      if (cursor === text.length) {
+        clearInterval(typingIntervals[element]);
+      }
+    }, interval_ms);
+  } catch (e) {
+    show_error(e);
+  }
 }
 
 // その他関数ここまで
@@ -313,23 +317,30 @@ function add_remove_notification(is_add, id, initial, description) {
    * @param {string} initial - The initial to display on the notification.
    * @param {string} description - The description to display on the notification.
    */
-  const parent = document.getElementById("header_notifications");
-  if (is_add) {
-    // Create a new notification element with the given ID, initial, and description.
-    let new_notification = document.createElement("div");
-    new_notification.classList.add("notification_icon");
-    new_notification.setAttribute("id", `notification_${id}`);
-    new_notification.innerHTML = `
+  try {
+    const parent = document.getElementById("header_notifications");
+    if (is_add) {
+      // Create a new notification element with the given ID, initial, and description.
+      let new_notification = document.createElement("div");
+      new_notification.classList.add("notification_icon");
+      new_notification.setAttribute("id", `notification_${id}`);
+      new_notification.innerHTML = `
       <div class="notification_icon">
         <div class="notification_initial">${initial}</div>
         <div class="notification_popup">${description}</div>
       </div>
     `;
-    // Add the new notification element to the parent element.
-    parent.appendChild(new_notification);
-  } else {
-    // Remove the notification element with the given ID from the parent element.
-    parent.removeChild(document.getElementById(`notification_${id}`));
+      // Add the new notification element to the parent element.
+      parent.appendChild(new_notification);
+    } else {
+      // Remove the notification element with the given ID from the parent element.
+      var target_element = document.getElementById(`notification_${id}`);
+      if (target_element) {
+        parent.removeChild(target_element);
+      }
+    }
+  } catch (e) {
+    show_error(e);
   }
 }
 
@@ -344,8 +355,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Prevent page reload
     window.addEventListener("beforeunload", function (e) {
       // 開発時はコメントアウト
-      e.preventDefault();
-      e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
+      // e.preventDefault();
+      // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
 
     document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
@@ -361,6 +372,7 @@ function Get_Initial_Settings(provided_setting_dict) {
    * @param {Object} provided_setting_dict - A dictionary of initial settings.
    */
   try {
+    document.getElementById("header_show_graphs").click(); // 起動時にデバイス接続設定の画面を表示
     console.log("Initialize start");
 
     // Copy provided settings to general_settings
@@ -550,23 +562,24 @@ function reload_connection_list(connection_list, clear_all = false) {
    * @param {Object} connection_list - The list of connections to display.
    * @param {boolean} [clear_all=false] - Whether to clear all connections before reloading.
    */
-  // Get the table body element
-  const tbody = document.getElementById("main_connection_settings").getElementsByTagName("tbody")[0];
+  try {
+    // Get the table body element
+    const tbody = document.getElementById("main_connection_settings").getElementsByTagName("tbody")[0];
 
-  // Clear all connections if requested
-  if (clear_all) {
-    tbody.innerHTML = "";
-  }
+    // Clear all connections if requested
+    if (clear_all) {
+      tbody.innerHTML = "";
+    }
 
-  // Add each connection to the table
-  if (connection_list != undefined) {
-    Object.keys(connection_list).forEach((id) => {
-      var new_tr = document.createElement("tr");
+    // Add each connection to the table
+    if (connection_list != undefined) {
+      Object.keys(connection_list).forEach((id) => {
+        var new_tr = document.createElement("tr");
 
-      // Add the appropriate class and elements based on the connection state
-      if (connection_list[id].connected === true) {
-        new_tr.classList.add("disconnect");
-        new_tr.innerHTML += `
+        // Add the appropriate class and elements based on the connection state
+        if (connection_list[id].connected === true) {
+          new_tr.classList.add("disconnect");
+          new_tr.innerHTML += `
           <td class="info">
             <div class="name">*${connection_list[id].name}</div>
             <div class="type">${connection_list[id].type}（接続済み）</div>
@@ -578,8 +591,8 @@ function reload_connection_list(connection_list, clear_all = false) {
             <div class="raw_received">${connection_list[id].response}</div>
           </td>
         `;
-      } else if (connection_list[id].connected === false) {
-        new_tr.innerHTML += `
+        } else if (connection_list[id].connected === false) {
+          new_tr.innerHTML += `
           <td class="info">
             <div class="name">${connection_list[id].name}</div>
             <div class="type">${connection_list[id].type}</div>
@@ -591,11 +604,14 @@ function reload_connection_list(connection_list, clear_all = false) {
             <div class="raw_received">${connection_list[id].response}</div>
           </td>
         `;
-      }
+        }
 
-      // Add the new row to the table body
-      tbody.appendChild(new_tr);
-    });
+        // Add the new row to the table body
+        tbody.appendChild(new_tr);
+      });
+    }
+  } catch (e) {
+    show_error(e);
   }
 }
 
@@ -605,14 +621,17 @@ function on_reset_connection_list_button_pushed() {
    * If the connection list is not currently being updated, it clears the list and
    * makes a call to retrieve the device list.
    */
+  try {
+    // Check if the connection list is being updated
+    if (is_now_updating_connection_list == false) {
+      // Clear the connection list
+      reload_connection_list((connection_list = undefined), (clear_all = true));
 
-  // Check if the connection list is being updated
-  if (is_now_updating_connection_list == false) {
-    // Clear the connection list
-    reload_connection_list((connection_list = undefined), (clear_all = true));
-
-    // Retrieve the device list
-    eel.get_device_list();
+      // Retrieve the device list
+      eel.get_device_list();
+    }
+  } catch (e) {
+    show_error(e);
   }
 }
 
@@ -659,19 +678,23 @@ function change_dark_mode(change_to = "") {
    * @param {string} change_to - Optional parameter to set the mode.
    *                             Possible values: "dark", "light", "".
    */
-  const is_now_dark_mode = document.getElementsByTagName("html")[0].classList.contains("dark");
+  try {
+    const is_now_dark_mode = document.getElementsByTagName("html")[0].classList.contains("dark");
 
-  const is_change_to_dark = change_to == "dark" || (change_to == "" && !is_now_dark_mode);
-  const is_change_to_light = change_to == "light" || (change_to == "" && is_now_dark_mode);
+    const is_change_to_dark = change_to == "dark" || (change_to == "" && !is_now_dark_mode);
+    const is_change_to_light = change_to == "light" || (change_to == "" && is_now_dark_mode);
 
-  if (is_change_to_light) {
-    document.getElementsByTagName("html")[0].classList.remove("dark");
-    document.getElementsByTagName("html")[0].classList.add("light");
-    return;
-  } else if (is_change_to_dark) {
-    document.getElementsByTagName("html")[0].classList.remove("light");
-    document.getElementsByTagName("html")[0].classList.add("dark");
-    return;
+    if (is_change_to_light) {
+      document.getElementsByTagName("html")[0].classList.remove("dark");
+      document.getElementsByTagName("html")[0].classList.add("light");
+      return;
+    } else if (is_change_to_dark) {
+      document.getElementsByTagName("html")[0].classList.remove("light");
+      document.getElementsByTagName("html")[0].classList.add("dark");
+      return;
+    }
+  } catch (e) {
+    show_error(e);
   }
 }
 
