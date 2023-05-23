@@ -149,7 +149,7 @@ class Connection:
             None
         """
         SEPARATE_NAME_VALUE = ":"
-        SEPARATE_VALUE_VALUE = "\n"
+        SEPARATE_VALUE_VALUE = "#"
         SEPARATE_EACH_UPDATE = "@"
 
         while self.is_enabled_connection:
@@ -162,7 +162,7 @@ class Connection:
                 eel.sleep(random.random() / 5)
                 for key in latest_data_dict:
                     latest_data_dict[key] = max(0, latest_data_dict[key] + int((random.random() * 10) - 5))
-                data = SEPARATE_VALUE_VALUE.join([f"{key}{SEPARATE_NAME_VALUE}{value}" for key, value in latest_data_dict.items()]) + SEPARATE_EACH_UPDATE
+                data = SEPARATE_VALUE_VALUE.join([f"{key}{SEPARATE_NAME_VALUE}{value}" for key, value in latest_data_dict.items()]) + SEPARATE_VALUE_VALUE + SEPARATE_EACH_UPDATE
             elif self.connection_type == "Serial":
                 # If using serial, read data from the connection
                 data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
@@ -172,22 +172,27 @@ class Connection:
 
             # Send the data
             if len(data) > 0:
-                self.received_text += data
+                self.received_text += data.replace("\r", "").replace("\n", "#")
+                _print(self.received_text)
 
             if SEPARATE_EACH_UPDATE in self.received_text:
                 # Parse the received text
                 parsed_text = [dict([x.split(SEPARATE_NAME_VALUE) for x in y.split(SEPARATE_VALUE_VALUE) if SEPARATE_NAME_VALUE in x]) for y in self.received_text.split(SEPARATE_EACH_UPDATE)]
+                _print(parsed_text)
                 if len(parsed_text) > 0:
                     # Update the latest data dictionary
                     new_data_dict = {key: int(value) for key, value in parsed_text[0].items()}
-                    new_data_dict.update(latest_data_dict)
+                    _print(new_data_dict)
+                    latest_data_dict.update(new_data_dict)
                     eel.Data_PY2JS(latest_data_dict)  # type: ignore
+                    _print(latest_data_dict)
 
                     if not IS_DISABLED_BACKGROUND_LOGGING:
                         # Log the latest data
                         with open(logging_filename, mode="a", encoding="UTF-8") as file:
                             new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "\n"
                             file.write(new_line)
+                self.received_text = ""
 
 
 @eel.expose
