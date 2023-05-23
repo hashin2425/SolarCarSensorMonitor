@@ -359,6 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // e.returnValue = "本当に閉じますか？ウィンドウを閉じても、ロギングは継続されます。";
     });
 
+    eel.window_initialize(); // Pythonに設定情報の送信を要求する
     document.getElementById("header_show_connection").click(); // 起動時にデバイス接続設定の画面を表示
   } catch (e) {
     show_error(e);
@@ -500,6 +501,7 @@ function Get_Initial_Settings(provided_setting_dict) {
 
     console.log("Initialize done");
     is_received_initial_settings = true;
+    return true;
   } catch (e) {
     show_error(e);
   }

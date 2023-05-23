@@ -5,6 +5,7 @@ import os
 import sys
 import random
 import warnings
+import tracemalloc
 from datetime import datetime as dt
 from threading import Thread
 
@@ -270,11 +271,17 @@ def get_device_list():
 
 
 # ---- GUI生成関連 ----
+@eel.expose
+def window_initialize():
+    # Windowの起動が完了した段階でJS側から呼び出す
+    # Python側の設定(INITIAL_SETTINGS)をJSに送信する
+    _ = eel.Get_Initial_Settings(INITIAL_SETTINGS)()  # type:ignore
+
+
 def start_window():
     global is_window_shown
     is_window_shown = True
     eel.start("index.html", size=(1280, 720), mode="chrome", port=0, host="localhost", close_callback=after_closed_window, block=False)  # ポートを自動的に設定する
-    eel.Get_Initial_Settings(INITIAL_SETTINGS)  # type: ignore
 
     update_connection_list_th = Thread(target=get_device_list)
     update_connection_list_th.start()
@@ -286,6 +293,7 @@ def after_closed_window(*args):  # type: ignore # pylint: disable=W0613
 
 
 def kill_entire_system():
+    print("すべてのシステムを終了します。")
     connect_device("**disconnect**")
     sys.exit()
 
@@ -294,14 +302,16 @@ def continue_logging_and_exit():
     # ウィンドウ終了時にロギングを継続し、プログラムを終了するか尋ねる
     while True:
         eel.sleep(0.1)  # waitさせないとページにアクセスできない
-        if IS_DISABLED_BACKGROUND_LOGGING and not is_window_shown:
+        if IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED and not is_window_shown:
             kill_entire_system()
-        if not IS_DISABLED_BACKGROUND_LOGGING and not is_window_shown:
-            input_character = input("ダッシュボードを閉じましたが、システムは稼働しています。\nシステム(Python)を終了する -> c\nもう一度ダッシュボードを開く -> o\n")
-            if input_character == "c":
+        if not IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED and not is_window_shown:
+            input_character = input("ダッシュボードを閉じましたが、システムは稼働しています。\nバックエンドシステム(Python)を終了する -> close\nもう一度ダッシュボードを開く -> open\n> ")
+            if input_character == "close":
                 kill_entire_system()
-            elif input_character == "o":
+            elif input_character == "open":
+                _print(00)
                 start_window()
+                _print(11)
 
 
 def window_alive_check():
@@ -342,6 +352,10 @@ eel.init("interface", allowed_extensions=["eel_js"])
 IS_DISABLED_BACKGROUND_LOGGING = "--DisableBackGroundLogging" in sys.argv
 eel.add_remove_notification(IS_DISABLED_BACKGROUND_LOGGING, "IS_DISABLED_BACKGROUND_LOGGING", "L", "[デバッグ機能]ログファイルの生成が停止されています。")  # type: ignore
 #
+# --ClosePythonWhenWindowClosed : ウィンドウを閉じる時にPythonを終了する
+IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED = "--ClosePythonWhenWindowClosed" in sys.argv
+eel.add_remove_notification(IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED, "IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED", "C", "[デバッグ機能]ウィンドウ終了時に、バックエンドシステムが終了されます。")  # type: ignore
+#
 # --UseDummyData : ダミーのデバイスを利用できる。デバッグ用
 IS_USE_DUMMY_DATA = "--UseDummyData" in sys.argv
 eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デバッグ機能]ダミーデバイスが有効です。")  # type: ignore
@@ -350,7 +364,12 @@ eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デ�
 DEBUG_PRINT_MODE = "--DebugPrint" in sys.argv
 eel.add_remove_notification(DEBUG_PRINT_MODE, "DEBUG_PRINT_MODE", "P", "[デバッグ機能]デバッグ情報がコンソールに出力されます。")  # type: ignore
 if not DEBUG_PRINT_MODE:
+    # エラーや警告を非表示
     warnings.simplefilter("ignore")
+else:
+    # エラーや警告をすべて表示
+    tracemalloc.start()
+    warnings.resetwarnings()
 #
 os.system("cls")
 _print("Args:", sys.argv)
@@ -370,7 +389,7 @@ if __name__ == "__main__":
         antecedence_setting = load_JsonWithComment(PATH_PRIMARY_SETTINGS)
         INITIAL_SETTINGS["values"].update(antecedence_setting)
 
-    thread = Thread(target=window_alive_check)
+    thread = Thread(target=window_alive_check, daemon=True)
     thread.start()
 
     start_window()
