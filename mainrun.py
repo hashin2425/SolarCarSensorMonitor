@@ -28,6 +28,7 @@ from serial.serialutil import SerialException
 
 
 latest_data_dict: dict = dict()  # 最新のデータのみを格納する
+latest_timestamp: str = ""
 device_dict: dict = dict()
 is_window_shown: bool = False
 is_continue_receive_send_data: bool = True
@@ -148,6 +149,7 @@ class Connection:
         Returns:
             None
         """
+        global latest_timestamp
         SEPARATE_NAME_VALUE = ":"
         SEPARATE_VALUE_VALUE = "#"
         SEPARATE_EACH_UPDATE = "@"
@@ -175,7 +177,8 @@ class Connection:
                 self.received_text += data.replace("\r", "").replace("\n", "#")
                 _print(self.received_text)
 
-            if SEPARATE_EACH_UPDATE in self.received_text:
+            is_do_update_graph = SEPARATE_EACH_UPDATE in self.received_text or latest_timestamp != ""
+            if is_do_update_graph:
                 # Parse the received text
                 parsed_text = [dict([x.split(SEPARATE_NAME_VALUE) for x in y.split(SEPARATE_VALUE_VALUE) if SEPARATE_NAME_VALUE in x]) for y in self.received_text.split(SEPARATE_EACH_UPDATE)]
                 _print(parsed_text)
@@ -189,10 +192,23 @@ class Connection:
 
                     if not IS_DISABLED_BACKGROUND_LOGGING:
                         # Log the latest data
+                        # 一時的にログファイルを生成する処理を行わせる
+                        # あとで修正する
+                        if logging_filename == "":
+                            create_new_logging_file()
+
                         with open(logging_filename, mode="a", encoding="UTF-8") as file:
-                            new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "\n"
+                            new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "," + latest_timestamp + "\n"
                             file.write(new_line)
+                            latest_timestamp = ""
                 self.received_text = ""
+
+
+@eel.expose
+def receive_timestamp(comment):
+    global latest_timestamp
+    print(comment)
+    latest_timestamp += comment
 
 
 @eel.expose
@@ -256,18 +272,19 @@ def get_device_list():
             device_dict = device_dict | temp
 
     # Bluetooth
-    for device in bluetooth.discover_devices(lookup_names=True, lookup_class=False):  # ここで10秒くらいかかる
-        temp_response = "Timeout"
-        try:
-            with bluetooth.BluetoothSocket(bluetooth.RFCOMM) as con:  # type: ignore
-                con.connect((device[0], 1))
-                temp_response = con.recv(1024).decode("utf-8")
-        except (bluetooth.BluetoothError, AttributeError, KeyError) as error:
-            temp_response = str(error)
-        finally:
-            temp = {device[0]: {"name": device[1], "type": "Bluetooth", "response": temp_response, "connected": device[0] == now_connection_id}}
-            eel.reload_connection_list(temp)  # type:ignore
-            device_dict = device_dict | temp
+    # 仕様変更に付き、一時的にコメントアウトする。あとで有効/無効の切り替えをできるようにする
+    # for device in bluetooth.discover_devices(lookup_names=True, lookup_class=False):  # ここで10秒くらいかかる
+    #     temp_response = "Timeout"
+    #     try:
+    #         with bluetooth.BluetoothSocket(bluetooth.RFCOMM) as con:  # type: ignore
+    #             con.connect((device[0], 1))
+    #             temp_response = con.recv(1024).decode("utf-8")
+    #     except (bluetooth.BluetoothError, AttributeError, KeyError) as error:
+    #         temp_response = str(error)
+    #     finally:
+    #         temp = {device[0]: {"name": device[1], "type": "Bluetooth", "response": temp_response, "connected": device[0] == now_connection_id}}
+    #         eel.reload_connection_list(temp)  # type:ignore
+    #         device_dict = device_dict | temp
 
     eel.progress_manager("connection_list_update_done")  # type:ignore
 

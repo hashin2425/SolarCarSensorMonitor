@@ -45,8 +45,10 @@
         <div id="timestamp_insert">
           <div class="timestamp">
             <input class="ts_text" type="text" id="1" oninput="timestamp_onchange()" />
-            <input class="ts_submit" type="button" value="入力開始時の時刻で挿入" onclick="" />
-            <input class="ts_submit" type="button" value="現在時刻で挿入" onclick="" />
+            <!--
+              <input class="ts_submit" type="button" value="入力開始時の時刻で挿入" onclick="timestamp_on_pushed('');" />
+            -->
+            <input class="ts_submit" type="button" value="現在時刻で挿入" onclick="timestamp_on_pushed('now');" />
           </div>
         </div>
       </div>

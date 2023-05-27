@@ -241,8 +241,8 @@ function add_timestamp_insert(unix) {
   }
 }
 
-function timestamp_onchange() {
-  // console.log(document.getElementById("1").value);
+function timestamp_on_pushed(mode) {
+  eel.receive_timestamp(document.getElementById("1").value);
 }
 
 // グラフ描画ここまで
