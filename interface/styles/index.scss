@@ -1,4 +1,5 @@
-$height_shown_header: 45px;
+$height_shown_header: 35pt;
+$height_footer: 30pt;
 
 @mixin body_mixin($color_palette) {
   $color0: map-get($color_palette, color0);
@@ -13,6 +14,7 @@ $height_shown_header: 45px;
     background-color: $color0;
     margin: 0;
     height: 100%;
+    overflow: hidden;
     div#alert_timeout {
       display: none;
       width: 100%;
@@ -135,12 +137,16 @@ $height_shown_header: 45px;
       }
     }
     div#main {
-      margin-top: $height_shown_header;
-      height: 100%;
+      padding-top: $height_shown_header;
+      height: calc(100% - #{$height_shown_header} - #{$height_footer});
       div#main_graphs {
-        display: flex;
+        width: 100%;
         height: 100%;
+        overflow: auto;
+
+        display: flex;
         div#indicators {
+          overflow: auto;
           width: 25%;
           background-color: $color4;
           height: 100%;
@@ -179,6 +185,7 @@ $height_shown_header: 45px;
           }
         }
         div#graphs {
+          overflow: auto;
           padding-top: 10px;
           width: 80%;
           display: flex;
@@ -230,6 +237,7 @@ $height_shown_header: 45px;
         }
         div#timestamp_insert {
           background-color: $color2;
+          height: $height_footer;
           position: fixed;
           bottom: 0;
           width: 100%;
@@ -272,11 +280,15 @@ $height_shown_header: 45px;
         }
       }
       div#main_export_data {
+        overflow: auto;
+        height: 100%;
         width: 100%;
         display: flex;
         flex-direction: column;
       }
       div#main_connection_settings {
+        overflow: auto;
+        height: 100%;
         width: 100%;
         table {
           width: 100%;
@@ -379,6 +391,8 @@ $height_shown_header: 45px;
         }
       }
       div#main_display_settings {
+        overflow: auto;
+        height: 100%;
         width: 100%;
         display: flex;
         flex-direction: column;
