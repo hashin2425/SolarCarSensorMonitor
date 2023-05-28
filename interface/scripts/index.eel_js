@@ -288,6 +288,13 @@ function on_clicked_header_button(comment) {
       document.getElementById("header_show_graphs").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
     }
+    // Show the graphs
+    if ("export_data" == comment) {
+      is_allow_all_graph_update = true;
+      hide_container();
+      document.getElementById("header_export_data").classList.add("displayed");
+      document.getElementById("main_export_data").setAttribute("style", "display:flex;");
+    }
     // Show the connection settings
     if ("show_connection" == comment) {
       is_allow_all_graph_update = false;
@@ -373,7 +380,7 @@ function Get_Initial_Settings(provided_setting_dict) {
    * @param {Object} provided_setting_dict - A dictionary of initial settings.
    */
   try {
-    document.getElementById("header_show_graphs").click(); // 起動時にデバイス接続設定の画面を表示
+    document.getElementById("header_export_data").click(); // 起動時にデバイス接続設定の画面を表示
     console.log("Initialize start");
 
     // Copy provided settings to general_settings
