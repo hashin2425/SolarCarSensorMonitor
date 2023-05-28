@@ -4,5 +4,6 @@ pyinstaller
 py2exe
 PyBluez2
 pyserial
+influxdb-client
 
 ###### Requirements with Version Specifiers ######`
