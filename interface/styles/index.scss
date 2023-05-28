@@ -144,6 +144,33 @@ $height_shown_header: 45px;
           width: 20%;
           background-color: $color4;
           height: 100%;
+          table {
+            border-spacing: 0pt 5pt;
+            width: 100%;
+            tbody {
+              tr {
+                td {
+                  white-space: nowrap;
+                  &.name {
+                    border-left: transparent solid 3px;
+                    text-align: left;
+                    width: 1%;
+                    font-size: 12pt;
+                  }
+                  &.value {
+                    text-align: right;
+                    width: 100%;
+                    font-size: 15pt;
+                  }
+                  &.unit {
+                    text-align: left;
+                    width: 1%;
+                    font-size: 10pt;
+                  }
+                }
+              }
+            }
+          }
         }
         div#graphs {
           padding-top: 10px;
@@ -157,42 +184,42 @@ $height_shown_header: 45px;
             background-color: $color0;
             height: min-content;
           }
+          div.labels {
+            span.name {
+              font-size: 15pt;
+              color: $col_font_black;
+            }
+            span.value {
+              display: inline-block;
+              text-align: right;
+              justify-content: center;
+              min-width: 75pt;
+              height: 25pt;
+              font-size: 20pt;
+              color: $col_font_black;
+            }
+            span.unit {
+              font-size: 10pt;
+              color: $col_font_black;
+            }
+          }
+          div.indicator {
+            border-left: 3px solid transparent;
+            padding: 2px;
+            margin-top: 5pt;
+            &.danger {
+              animation: alert 0.65s ease-in-out infinite;
+            }
+            &.safe {
+              background-color: $color4;
+            }
+          }
         }
         div#large_graphs {
           padding-top: 10px;
           width: 0em; // 初回読み込み時は0にすることでdiv#graphsのwidthを定めさせる
           div#large_graphs_display_name {
             font-size: 15pt;
-          }
-        }
-        div.labels {
-          span.name {
-            font-size: 15pt;
-            color: $col_font_black;
-          }
-          span.value {
-            display: inline-block;
-            text-align: right;
-            justify-content: center;
-            min-width: 75pt;
-            height: 25pt;
-            font-size: 20pt;
-            color: $col_font_black;
-          }
-          span.unit {
-            font-size: 10pt;
-            color: $col_font_black;
-          }
-        }
-        div.indicator {
-          border-left: 3px solid transparent;
-          padding: 2px;
-          margin-top: 5pt;
-          &.danger {
-            animation: alert 0.65s ease-in-out infinite;
-          }
-          &.safe {
-            background-color: $color4;
           }
         }
         div#timestamp_insert {

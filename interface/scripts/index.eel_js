@@ -154,8 +154,8 @@ function focus_graph_to(id) {
   }
 
   // highlight the selected graph's indicator and remove the highlight from the previously focused graph's indicator
-  document.getElementsByClassName(`indicator_${id}`)[0].setAttribute("style", "border-color: black;");
-  document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].setAttribute("style", "border-color: transparent;");
+  document.getElementsByClassName(`indicator_${id}`)[0].getElementsByClassName("name")[0].setAttribute("style", "border-color: black;");
+  document.getElementsByClassName(`indicator_${now_focus_graph_id}`)[0].getElementsByClassName("name")[0].setAttribute("style", "border-color: transparent;");
 
   // determine whether to switch from displaying all graphs to displaying a single large graph or vice versa
   let is_switch_all2large = !((id == "all" && now_focus_graph_id == "all") || (id != "all" && now_focus_graph_id != "all"));
@@ -380,7 +380,7 @@ function Get_Initial_Settings(provided_setting_dict) {
    * @param {Object} provided_setting_dict - A dictionary of initial settings.
    */
   try {
-    document.getElementById("header_export_data").click(); // 起動時にデバイス接続設定の画面を表示
+    document.getElementById("header_show_graphs").click(); // 起動時にデバイス接続設定の画面を表示
     console.log("Initialize start");
 
     // Copy provided settings to general_settings
@@ -404,13 +404,13 @@ function Get_Initial_Settings(provided_setting_dict) {
 
     // Insert elements in container
     const containers = document.getElementById("graphs");
-    const indicators = document.getElementById("indicators");
+    const indicators = document.getElementById("indicators").getElementsByTagName("table")[0];
 
     // Insert "Show all graphs" button
     indicators.innerHTML += `\
-      <div class="labels indicator indicator_all safe" onclick="focus_graph_to('all');" style="border-color: black;">\
-        <span class="name">すべてのグラフを表示する</span>\
-      </div>\
+      <tr class="labels indicator indicator_all safe" onclick="focus_graph_to('all');">\
+        <td style="border-color: black;" colspan="3" class="name">すべてのグラフを表示する</td>\
+      </tr>\
       `;
 
     // Insert containers and indicators for each dataset
@@ -428,12 +428,11 @@ function Get_Initial_Settings(provided_setting_dict) {
       </div>\
       `;
       indicators.innerHTML += `\
-      <div class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
-        <span class="name">${dataset_list[id].display_name}</span>\
-        <br>\
-        <span class="value value_${id}">-</span>\
-        <span class="unit">${dataset_list[id].unit}</span>\
-      </div>\
+      <tr class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
+        <td class="name">${dataset_list[id].display_name}</td>\
+        <td class="value value_${id}">-</td>\
+        <td class="unit">${dataset_list[id].unit}</td>\
+      </tr>\
       `;
     });
 
