@@ -161,7 +161,7 @@ $height_shown_header: 45px;
         div#large_graphs {
           padding-top: 10px;
           width: 0em; // 初回読み込み時は0にすることでdiv#graphsのwidthを定めさせる
-          div#large_graphs_display_name{
+          div#large_graphs_display_name {
             font-size: 15pt;
           }
         }
@@ -237,6 +237,11 @@ $height_shown_header: 45px;
             }
           }
         }
+      }
+      div#main_export_data {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
       }
       div#main_connection_settings {
         width: 100%;
@@ -344,48 +349,49 @@ $height_shown_header: 45px;
         width: 100%;
         display: flex;
         flex-direction: column;
-        div.table_container {
-          margin: 10px;
-          span.table_title {
-            display: block;
-            color: $col_font_black;
+      }
+      div.styled_table_container {
+        margin: 10px;
+        span.table_title {
+          display: block;
+          color: $col_font_black;
+          font-size: 20px;
+        }
+        table {
+          margin-bottom: 20px;
+          width: 100%;
+          border-collapse: collapse;
+          input {
+            border: none;
+            height: 100%;
+            width: calc(100% - 10px);
             font-size: 20px;
+            margin: 5px;
+            background-color: $color0;
+            color: $col_font_black;
           }
-          table {
-            margin-bottom: 20px;
-            width: 100%;
-            border-collapse: collapse;
-            input {
-              border: none;
-              height: 100%;
-              width: calc(100% - 10px);
-              font-size: 20px;
-              margin: 5px;
-              background-color: $color0;
-              color: $col_font_black;
+          tr {
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.1);
             }
-            tr {
-              &:hover {
-                background-color: rgba(0, 0, 0, 0.1);
-              }
-              td {
-                min-width: 75px;
-                padding-left: 5px;
-                border-spacing: 0;
-                border-bottom: $color1 solid 1px;
-              }
+            td {
+              min-width: 75px;
+              padding-left: 5px;
+              border-spacing: 0;
+              border-bottom: $color1 solid 1px;
             }
-            thead {
-              background-color: $color1;
-              color: $col_font_white;
-            }
-            tbody {
-              color: $col_font_black;
-              min-height: 25px;
-            }
+          }
+          thead {
+            background-color: $color1;
+            color: $col_font_white;
+          }
+          tbody {
+            color: $col_font_black;
+            min-height: 25px;
           }
         }
       }
+
       div.container_footer {
         // 共通コンポーネント：各画面のフッター部分
         z-index: 9998; // ヘッダーの次に最前列に表示する
