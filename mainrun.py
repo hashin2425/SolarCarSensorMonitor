@@ -34,6 +34,7 @@ is_window_shown: bool = False
 is_continue_receive_send_data: bool = True
 main_connection = None
 logging_filename: str = ""
+BAUD_RATE = 115200
 
 # ---- 設定項目 ----
 PATH_PRIMARY_SETTINGS = "./settings.env.json"
@@ -63,20 +64,20 @@ INITIAL_SETTINGS = {
             "body_regeneration_rate": {"display_name": "機体回生", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
             "body_accelerator": {"display_name": "機体アクセル", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
             "body_break": {"display_name": "機体ブレーキ", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
-            "motor_volts": {"display_name": "モーター電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000},
+            "motor_volts": {"display_name": "モーター電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
             "motor_ampere": {"display_name": "モーター電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
             "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
             "motor_temperature": {"display_name": "モーター温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
             "motor_accumulated_power": {"display_name": "モーター積算消費電力", "unit": "mWh", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000},
+            "battery_volts": {"display_name": "バッテリー電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
             "battery_ampere": {"display_name": "バッテリー電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
             "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
             "battery_temperature": {"display_name": "バッテリー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
             "battery_accumulated_power": {"display_name": "バッテリー積算出力電力", "unit": "mWh", "safe_range_min": -10000, "safe_range_max": 10000},
             "battery_remain_power_percent": {"display_name": "バッテリー残量", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
             "battery_remain_power_ah": {"display_name": "バッテリー残量", "unit": "Ah", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000},
-            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000},
+            "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
+            "solar_volts": {"display_name": "ソーラー電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
             "solar_ampere": {"display_name": "ソーラー電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
             "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
             "solar_temperature": {"display_name": "ソーラー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
@@ -127,7 +128,7 @@ class Connection:
         # Serial
         if device_dict[self.connect_to_id]["type"] == "Serial":
             self.connection_type = "Serial"
-            self.connection_serial = serial.Serial(self.connect_to_id, 9600, timeout=1)
+            self.connection_serial = serial.Serial(self.connect_to_id, BAUD_RATE, timeout=1)
         # Bluetooth
         elif device_dict[self.connect_to_id]["type"] == "Bluetooth":
             self.connection_type = "Bluetooth"
@@ -169,7 +170,7 @@ class Connection:
         global latest_timestamp
         SEPARATE_NAME_VALUE = ":"
         SEPARATE_VALUE_VALUE = "#"
-        SEPARATE_EACH_UPDATE = "@"
+        SEPARATE_EACH_UPDATE = "*"
 
         while self.is_enabled_connection:
             eel.sleep(0.05)
@@ -201,7 +202,7 @@ class Connection:
                 _print(parsed_text)
                 if len(parsed_text) > 0:
                     # Update the latest data dictionary
-                    new_data_dict = {key: int(value) for key, value in parsed_text[0].items()}
+                    new_data_dict = {key: float(value) for key, value in parsed_text[0].items()}
                     _print(new_data_dict)
                     latest_data_dict.update(new_data_dict)
                     eel.Data_PY2JS(latest_data_dict)  # type: ignore
@@ -279,7 +280,7 @@ def get_device_list():
     for device in list_ports.comports():
         temp_response = "Timeout"
         try:
-            with serial.Serial(device.device, 9600, timeout=1) as con:
+            with serial.Serial(device.device, BAUD_RATE, timeout=1) as con:
                 temp_response = con.read(999999).decode("utf-8")  # 999999byteまで取得
         except (serial.SerialException, SerialException, KeyError, AttributeError) as error:
             temp_response = str(error)
