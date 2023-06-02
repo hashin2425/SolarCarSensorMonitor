@@ -18,11 +18,12 @@
       <div id="header_on_shown">
         <div id="menu_title">
           <img src="./icon.png" alt="icon" height="25pt" />
-          <div>Dashboard(仮)</div>
+          <div>Dashboard</div>
         </div>
         <div id="header_buttons">
           <div id="header_show_graphs" class="header_button" onclick="on_clicked_header_button('show_graphs')">グラフ表示</div>
-          <div id="header_export_data" class="header_button" onclick="on_clicked_header_button('export_data')">データ出力</div>
+          <div id="header_export_data" class="header_button" onclick="on_clicked_header_button('show_export_data')">データ出力</div>
+          <div id="header_input_settings" class="header_button" onclick="on_clicked_header_button('show_input_settings')">入力設定</div>
           <div id="header_show_connection" class="header_button" onclick="on_clicked_header_button('show_connection')">接続</div>
           <div id="header_show_settings" class="header_button" onclick="on_clicked_header_button('show_settings')">設定</div>
           <div id="header_bar_hide" class="header_button" onclick="on_clicked_header_button('bar_hide')">メニューを閉じる</div>
@@ -147,6 +148,29 @@
           </table>
         </div>
       </div>
+      <div id="main_input_settings">
+        <div class="styled_table_container">
+          <span class="table_title">入力データの処理設定</span>
+          <table>
+            <thead>
+              <tr>
+                <td>ID</td>
+                <td>表示名</td>
+                <td>データ型</td>
+                <td>単位</td>
+                <td>安全範囲（最小値）</td>
+                <td>安全範囲（最大値）</td>
+                <td>グラフ y最小値</td>
+                <td>グラフ y最大値</td>
+                <td>入力順</td>
+                <td>表示順</td>
+                <td>表示色</td>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
       <div id="main_connection_settings" style="display: none">
         <table>
           <thead>
@@ -238,6 +262,31 @@
               <tr>
                 <td>利用方法</td>
                 <td><a href="" target="_blank">外部リンクを開く(GitHub)</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <td colspan="3">開発者向け</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>コンテキストメニュー</td>
+                <td>右クリックで表示されるコンテキストメニューを有効化/無効化します。</td>
+                <td>
+                  <div onclick="Change_can_right_menu(true);">有効化する</div>
+                  <div onclick="Change_can_right_menu(false);">無効化する</div>
+                </td>
+              </tr>
+              <tr>
+                <td>テキスト選択</td>
+                <td>User-selectを変更することでテキストの範囲選択が有効化/無効化されます。</td>
+                <td>
+                  <div onclick="Change_can_user_select(true);">有効化する</div>
+                  <div onclick="Change_can_user_select(false);">無効化する</div>
+                </td>
               </tr>
             </tbody>
           </table>
