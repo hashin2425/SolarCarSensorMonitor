@@ -133,6 +133,8 @@ function Data_PY2JS(data) {
         // Add new data to dataset
         let new_data = data[id];
         dataset_list[id].data.push(new_data);
+
+        if (dataset_list[id].is_show_graph) {
         dataset_list[id].chart_obj.data.labels.push("");
 
         // If dataset has exceeded max display limit, remove oldest data point
@@ -145,6 +147,7 @@ function Data_PY2JS(data) {
         var is_display_all_graphs = "all" == now_focus_graph_id;
         if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
           dataset_list[id].chart_obj.update();
+        }
         }
 
         // Check if it's time to update graph indicators and update if necessary
@@ -166,6 +169,7 @@ function Data_PY2JS(data) {
 
         // Update graph indicators to reflect safe range
         Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
+          if (!isNaN(parseFloat(dataset_list[id].safe_range_max)) && !isNaN(dataset_list[id].safe_range_min)) {
           if (dataset_list[id].safe_range_max < new_data) {
             element.classList.add("danger");
             element.classList.remove("safe");
@@ -175,6 +179,7 @@ function Data_PY2JS(data) {
           } else {
             element.classList.remove("danger");
             element.classList.add("safe");
+          }
           }
         });
       }
@@ -467,6 +472,7 @@ function Get_Initial_Settings(provided_setting_dict) {
 
     // Insert containers and indicators for each dataset
     Object.keys(dataset_list).forEach(function (id) {
+      if (dataset_list[id].is_show_graph === true) {
       containers.innerHTML += `\
       <div class="container container_${id}">\
         <div class="labels">\
@@ -479,6 +485,7 @@ function Get_Initial_Settings(provided_setting_dict) {
         </div>\
       </div>\
       `;
+      }
       indicators.innerHTML += `\
       <tr class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
         <td class="name">${dataset_list[id].display_name}</td>\
@@ -490,6 +497,7 @@ function Get_Initial_Settings(provided_setting_dict) {
 
     // Enable each graph
     Object.keys(dataset_list).forEach(function (id) {
+      if (dataset_list[id].is_show_graph === true) {
       let this_canvas = document.getElementById(`chart_${id}`).getContext("2d");
       dataset_list[id].chart_obj = new Chart(this_canvas, {
         type: "line",
@@ -531,6 +539,7 @@ function Get_Initial_Settings(provided_setting_dict) {
           },
         },
       });
+      }
     });
 
     // Insert settings
