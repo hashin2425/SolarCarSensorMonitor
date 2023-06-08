@@ -68,6 +68,34 @@ function Change_can_user_select(can_select) {
   }
 }
 
+function remove_invalid_keys_as_python(given_dictionary) {
+  console.log(given_dictionary);
+  /* JSからPythonへ設定Dictionaryを送信するとき、ChartObjectなどはPythonオブジェクトに変換できないため、除去する */
+  if (typeof given_dictionary !== "object" || given_dictionary === null) {
+    return given_dictionary;
+  }
+
+  const temp_dict = {};
+  Object.keys(given_dictionary).forEach((key) => {
+    var value_type = typeof given_dictionary[key];
+    if (["string", "number", "boolean"].includes(value_type)) {
+      temp_dict[key] = given_dictionary[key];
+    } else if (value_type == "object" && ["chart_obj"].includes(key)) {
+      temp_dict[key] = remove_invalid_keys_as_python(given_dictionary[key]);
+    }
+  });
+
+  return temp_dict;
+}
+
+function try_convert_to_numeric(string_like) {
+  if (isNaN(parseFloat(string_like))) {
+    return string_like;
+  } else {
+    return parseFloat(string_like);
+  }
+}
+
 // その他関数ここまで
 
 // グラフ描画
@@ -535,16 +563,16 @@ function Get_Initial_Settings(provided_setting_dict) {
       input_setting_table_tbody.innerHTML += `
       <tr>
         <td>${id}</td>
-        <td>${general_settings.data_list[id].display_name}</td>
-        <td>データ型</td>
+        <td><input style="width: 175pt;" type="text" id="input_setting_${id}_display_name" value="${general_settings.data_list[id].display_name}"></td>
+        <td>float</td>
         <td>${general_settings.data_list[id].unit}</td>
-        <td>安全範囲（最小値）</td>
-        <td>安全範囲（最大値）</td>
-        <td>グラフ y最小値</td>
-        <td>グラフ y最大値</td>
-        <td>入力順</td>
-        <td>表示順</td>
-        <td>表示色</td>
+        <td>red</td>
+        <td><input style="width: 50pt;" type="text" id="input_setting_${id}_" value="${general_settings.data_list[id].safe_range_min}"></td>
+        <td><input style="width: 50pt;" type="text" id="input_setting_${id}_" value="${general_settings.data_list[id].safe_range_max}"></td>
+        <td><input style="width: 50pt;" type="text" id="input_setting_${id}_" value="${general_settings.data_list[id].y_lim_min}"></td>
+        <td><input style="width: 50pt;" type="text" id="input_setting_${id}_" value="${general_settings.data_list[id].y_lim_max}"></td>
+        <td>${general_settings.data_list[id].display_sort}</td>
+        <td>${general_settings.data_list[id].input_sort}</td>
       </tr>
       `;
     });
@@ -702,10 +730,12 @@ function apply_new_settings() {
 
     // Get all the rows in the settings table body and loop through them
     const settings_table_body_trs = settings_table_body.getElementsByTagName("tr");
+
+    const new_settings = {};
     Array.from(settings_table_body_trs).forEach((tr) => {
       // Get the variable ID and value for the current row
       var variable_id = tr.getElementsByTagName("td")[0].textContent;
-      var variable_value = tr.getElementsByTagName("input")[0].value;
+      var variable_value = try_convert_to_numeric(tr.getElementsByTagName("input")[0].value);
 
       // Split the variable ID into its parent and child parts
       var variable_id_parent = variable_id.split(".")[0];
@@ -713,7 +743,12 @@ function apply_new_settings() {
 
       // Update the corresponding value in the general_settings object
       general_settings[variable_id_parent][variable_id_child] = variable_value;
+      if (new_settings[variable_id_parent] == undefined) {
+        new_settings[variable_id_parent] = {};
+      }
+      new_settings[variable_id_parent][variable_id_child] = variable_value;
     });
+    eel.apply_new_settings_to_python(new_settings);
 
     // Display a success message
     insert_text_as_typing(document.getElementById("main_display_settings").getElementsByClassName("message")[0], "設定を適用しました。ここで表示やデータ処理に関する設定を変更できます。", true);

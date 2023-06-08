@@ -49,39 +49,43 @@ INITIAL_SETTINGS = {
             "data_log_dir": "ロギングの保存先ファイル名を指定します。ソフトウェアのexeが存在するディレクトリ上にファイルを生成します。",
             "data_log_filename": "ロギングによって生成されたファイルの接頭辞を指定します。日時と拡張子が自動的に補完されます。例：log_20220101_1010.csv",
         },
+        "body": {
+            "initial_battery_ah": "ソーラーカーに搭載されたバッテリーの初期残存量を指定します。単位はAh。",
+        },
     },
     "values": {
         "interface": {
-            "update_interval_sec": 0.1,
+            "update_interval_sec": 1,
             "graph_max_display": 100,
             "dark_mode": False,
         },
         "data_logging": {"data_log_dir": "store", "data_log_filename": "log"},
+        "body": {"initial_battery_ah": 4000},
         "data_list": {
-            "body_speed": {"display_name": "機体速度", "unit": "km/h", "safe_range_min": -10000, "safe_range_max": 10000},
-            "body_traveled_distance": {"display_name": "機体積算移動距離", "unit": "km", "safe_range_min": -10000, "safe_range_max": 10000},
-            "body_temperature": {"display_name": "機体温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
-            "body_regeneration_rate": {"display_name": "機体回生", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
-            "body_accelerator": {"display_name": "機体アクセル", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
-            "body_break": {"display_name": "機体ブレーキ", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
-            "motor_volts": {"display_name": "モーター電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
-            "motor_ampere": {"display_name": "モーター電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
-            "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
-            "motor_temperature": {"display_name": "モーター温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
-            "motor_accumulated_power": {"display_name": "モーター積算消費電力", "unit": "mWh", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_volts": {"display_name": "バッテリー電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_ampere": {"display_name": "バッテリー電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
-            "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
-            "battery_temperature": {"display_name": "バッテリー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_accumulated_power": {"display_name": "バッテリー積算出力電力", "unit": "mWh", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_remain_power_percent": {"display_name": "バッテリー残量", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_remain_power_ah": {"display_name": "バッテリー残量", "unit": "Ah", "safe_range_min": -10000, "safe_range_max": 10000},
-            "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
-            "solar_volts": {"display_name": "ソーラー電圧", "unit": "mV", "safe_range_min": -10000, "safe_range_max": 10000},
-            "solar_ampere": {"display_name": "ソーラー電流", "unit": "mA", "safe_range_min": 0, "safe_range_max": 2},
-            "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2},
-            "solar_temperature": {"display_name": "ソーラー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000},
-            "solar_accumulated_power": {"display_name": "ソーラー積算発電量", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000},
+            "body_speed": {"display_name": "機体速度", "unit": "km/h", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 0, "input_sort": 0, "is_show_graph": True},
+            "body_traveled_distance": {"display_name": "機体積算移動距離", "unit": "km", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 1, "input_sort": 1},
+            "body_temperature": {"display_name": "機体温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 2, "input_sort": 2, "is_show_graph": True},
+            "body_regeneration_rate": {"display_name": "機体回生", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 3, "input_sort": 3},
+            "body_accelerator": {"display_name": "機体アクセル", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 4, "input_sort": 4},
+            "body_break": {"display_name": "機体ブレーキ", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 5, "input_sort": 5},
+            "motor_volts": {"display_name": "モーター電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 6, "input_sort": 6},
+            "motor_ampere": {"display_name": "モーター電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 7, "input_sort": 7},
+            "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 8, "input_sort": 8, "is_show_graph": True},
+            "motor_temperature": {"display_name": "モーター温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 9, "input_sort": 9},
+            "motor_accumulated_power": {"display_name": "モーター積算消費電力", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 10, "input_sort": 10},
+            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 11, "input_sort": 11},
+            "battery_ampere": {"display_name": "バッテリー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 12, "input_sort": 12},
+            "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 13, "input_sort": 13, "is_show_graph": True},
+            "battery_temperature": {"display_name": "バッテリー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 14, "input_sort": 14},
+            "battery_accumulated_power": {"display_name": "バッテリー積算出力電力", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 15, "input_sort": 15},
+            "battery_remain_power_percent": {"display_name": "バッテリー残量", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 16, "input_sort": 16},
+            "battery_remain_power_ah": {"display_name": "バッテリー残量", "unit": "Ah", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 17, "input_sort": 17, "is_show_graph": True},
+            "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 18, "input_sort": 18},
+            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 19, "input_sort": 19},
+            "solar_ampere": {"display_name": "ソーラー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 20, "input_sort": 20},
+            "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 21, "input_sort": 21, "is_show_graph": True},
+            "solar_temperature": {"display_name": "ソーラー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 22, "input_sort": 22},
+            "solar_accumulated_power": {"display_name": "ソーラー積算発電量", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 23, "input_sort": 23},
         },
     },
 }
@@ -357,7 +361,11 @@ def continue_logging_and_exit():
 def window_alive_check():
     while True:
         eel.sleep(0.01)  # waitさせないとページにアクセスできない
-        eel.window_alive_check()  # type: ignore
+
+@eel.expose
+def apply_new_settings_to_python(dictionary: dict):
+    INITIAL_SETTINGS["values"].update(dictionary)
+    write_Json(PATH_PRIMARY_SETTINGS, dictionary)
 
 
 # ---- GUI生成関連ここまで ----
@@ -365,11 +373,19 @@ def window_alive_check():
 
 # ---- その他関数類 ----
 def load_JsonWithComment(path):
-    with open(path, mode="r", encoding="UTF-8") as file:
-        raw_text = file.read()
-    text_comments_removed = re.sub(r"/\*[\s\S]*?\*/|//.*", "", raw_text)
-    setting = json.loads(text_comments_removed)
-    return setting
+    try:
+        with open(path, mode="r", encoding="UTF-8") as file:
+            raw_text = file.read()
+        text_comments_removed = re.sub(r"/\*[\s\S]*?\*/|//.*", "", raw_text)
+        setting = json.loads(text_comments_removed)
+        return setting
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
+        return dict()
+
+
+def write_Json(_path: str, _dict: dict) -> None:
+    with open(_path, mode="w", encoding="UTF-8") as file:
+        json.dump(_dict, file)
 
 
 @eel.expose

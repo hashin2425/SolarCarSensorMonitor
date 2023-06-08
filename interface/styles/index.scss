@@ -286,6 +286,22 @@ $height_footer: 30pt;
         display: flex;
         flex-direction: column;
       }
+      div#main_input_settings {
+        overflow: auto;
+        height: 100%;
+        width: 100%;
+        table {
+          white-space: nowrap;
+          position: relative;
+          thead {
+            position: sticky;
+            top: 0;
+            td {
+              border: 0;
+            }
+          }
+        }
+      }
       div#main_connection_settings {
         overflow: auto;
         height: 100%;
