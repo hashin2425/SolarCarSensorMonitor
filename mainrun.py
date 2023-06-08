@@ -306,7 +306,7 @@ def get_device_list():
         eel.reload_connection_list(temp)  # type:ignore
         device_dict = device_dict | temp
     # Wired
-    for device in list_ports.comports():
+    for device in reversed(list_ports.comports()):  # ポート番号の大きいものが接続対象であることが多いため、リストを逆にする
         temp_response = "Timeout"
         try:
             with serial.Serial(device.device, BAUD_RATE, timeout=1) as con:
