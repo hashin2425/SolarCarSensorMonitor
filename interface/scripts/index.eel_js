@@ -625,21 +625,31 @@ function progress_manager(message) {
   }
 }
 
-eel.expose(window_alive_check);
-function window_alive_check() {
+eel.expose(window_alive_check_fromPy);
+function window_alive_check_fromPy() {
   unix_before_data_updated = new Date().getTime();
 }
 
 setInterval(function () {
+  eel.window_alive_check_fromJS();
+}, 10);
+
+let connection_downtime = 0;
   const timeout_ms = 3000;
-  // console.log(new Date().getTime() - unix_before_data_updated);
+setInterval(function () {
+  const alert_element = document.getElementById("alert_timeout");
+  connection_downtime += 100;
+  // eel._print(connection_downtime, new Date().getTime() - unix_before_data_updated);
   if (new Date().getTime() - unix_before_data_updated > timeout_ms) {
-    document.getElementById("alert_timeout").setAttribute("style", "display: block;");
-    setTimeout(() => {
+    alert_element.setAttribute("style", "display: block;");
+    if (connection_downtime > timeout_ms * 2) {
       window.close();
-    }, 3000);
   }
-});
+  } else {
+    connection_downtime = 0;
+    alert_element.setAttribute("style", "display: none;");
+  }
+}, 100);
 
 // Pythonとの接続ここまで
 

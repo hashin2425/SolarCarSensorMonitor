@@ -3,6 +3,7 @@ import json
 import re
 import os
 import sys
+import time
 import random
 import warnings
 import tracemalloc
@@ -26,7 +27,7 @@ import serial
 from serial.tools import list_ports
 from serial.serialutil import SerialException
 
-
+latest_window_alive_check_epoch: float = time.time()
 latest_data_dict: dict = dict()  # 最新のデータのみを格納する
 latest_timestamp: str = ""
 device_dict: dict = dict()
@@ -120,6 +121,7 @@ class Connection:
     connection_type: str = "None"
     received_text: str = ""
     is_enabled_connection: bool = True
+    before_parsed_epoch_sec: float = time.time()
 
     def __init__(self, _connect_to_id: str) -> None:
         self.connect_to_id = _connect_to_id
@@ -358,17 +360,25 @@ def start_window():
     is_window_shown = True
     eel.start("index.html", size=(1280, 720), mode="chrome", port=0, host="localhost", close_callback=after_closed_window, block=False)  # ポートを自動的に設定する
 
-    update_connection_list_th = Thread(target=get_device_list)
-    update_connection_list_th.start()
-
 
 def after_closed_window(*args):  # type: ignore # pylint: disable=W0613
-    global is_window_shown
-    is_window_shown = False
+    # TODO : PCのスリープ時にこの関数が呼び出される不具合を修正する
+    global is_window_shown, latest_window_alive_check_epoch
+    _print("window_closed")
+    # もしWindowが残っている（閉じられたのではなくリロードされた）場合
+    # 1秒間の間にwindow_alive_check_fromJSが実行されるため、ウィンドウ終了とリロードを区別することができる
+    latest_window_alive_check_epoch = time.time()
+    temp = latest_window_alive_check_epoch
+    eel.sleep(1)
+    is_window_shown = temp != latest_window_alive_check_epoch
+    _print("is_window_shown:", is_window_shown)
 
 
 def kill_entire_system():
     print("すべてのシステムを終了します。")
+    for countdown in range(5):
+        print(5 - countdown)
+        eel.sleep(1)
     connect_device("**disconnect**")
     sys.exit()
 
@@ -384,14 +394,21 @@ def continue_logging_and_exit():
             if input_character == "close":
                 kill_entire_system()
             elif input_character == "open":
-                _print(00)
                 start_window()
-                _print(11)
 
 
-def window_alive_check():
+def window_alive_check_fromPy():
+    # Pythonから生存確認を実行する（生存確認が行われた時間の記録はJavaScript側）
     while True:
         eel.sleep(0.01)  # waitさせないとページにアクセスできない
+        eel.window_alive_check_fromPy()  # type: ignore
+
+
+@eel.expose
+def window_alive_check_fromJS():
+    # JavaScriptから生存確認を実行する（生存確認が行われた時間の記録はPython側）
+    global latest_window_alive_check_epoch
+    latest_window_alive_check_epoch = time.time()
 
 @eel.expose
 def apply_new_settings_to_python(dictionary: dict):
