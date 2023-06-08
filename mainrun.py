@@ -503,7 +503,7 @@ else:
     tracemalloc.start()
     warnings.resetwarnings()
 #
-os.system("cls")
+os.system("cls")  # コンソールクリア
 _print("Args:", sys.argv)
 # ---- Argsここまで ----
 
@@ -521,8 +521,8 @@ if __name__ == "__main__":
         antecedence_setting = load_JsonWithComment(PATH_PRIMARY_SETTINGS)
         INITIAL_SETTINGS["values"].update(antecedence_setting)
 
-    thread = Thread(target=window_alive_check, daemon=True)
-    thread.start()
+    thread_window_alive_check_fromPy = Thread(target=window_alive_check_fromPy, daemon=True)
+    thread_window_alive_check_fromPy.start()
 
     start_window()
     continue_logging_and_exit()

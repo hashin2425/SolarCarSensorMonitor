@@ -11,6 +11,7 @@
     <script type="text/javascript" src="scripts/index.eel_js"></script>
     <link rel="stylesheet" href="styles/index.css" />
   </head>
+
   <body>
     <div id="header">
       <div style="display: none" id="alert_timeout">Pythonバックエンドから切断されました。3秒後にウィンドウを終了します。</div>
@@ -147,6 +148,10 @@
             </tbody>
           </table>
         </div>
+        <div class="container_footer">
+          <span class="message">取得したデータをアウトプットするための設定をここでできます。</span>
+          <div class="button" id="submit_setting" onclick=";">aaa</div>
+        </div>
       </div>
       <div id="main_input_settings">
         <div class="styled_table_container">
@@ -214,7 +219,9 @@
               <tr>
                 <td>ダークモード</td>
                 <td></td>
-                <td><div onclick="change_dark_mode();">切り替え</div></td>
+                <td>
+                  <div onclick="change_dark_mode();">切り替え</div>
+                </td>
               </tr>
             </tbody>
           </table>

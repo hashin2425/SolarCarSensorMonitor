@@ -9,7 +9,7 @@ let now_focus_graph_id = "all"; // "all" or value_id
 let large_chart_obj = undefined;
 let is_allow_all_graph_update = true;
 let typingIntervals = {};
-const DEFAULT_PAGE_ID = "main_input_settings";
+const DEFAULT_PAGE_ID = "header_show_connection";
 
 // グローバル変数ここまで
 
@@ -135,19 +135,19 @@ function Data_PY2JS(data) {
         dataset_list[id].data.push(new_data);
 
         if (dataset_list[id].is_show_graph) {
-        dataset_list[id].chart_obj.data.labels.push("");
+          dataset_list[id].chart_obj.data.labels.push("");
 
-        // If dataset has exceeded max display limit, remove oldest data point
-        if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
-          dataset_list[id].data.shift();
-          dataset_list[id].chart_obj.data.labels.shift();
-        }
+          // If dataset has exceeded max display limit, remove oldest data point
+          if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
+            dataset_list[id].data.shift();
+            dataset_list[id].chart_obj.data.labels.shift();
+          }
 
-        // Check if it's time to update all graphs and update if necessary
-        var is_display_all_graphs = "all" == now_focus_graph_id;
-        if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
-          dataset_list[id].chart_obj.update();
-        }
+          // Check if it's time to update all graphs and update if necessary
+          var is_display_all_graphs = "all" == now_focus_graph_id;
+          if (is_display_all_graphs && is_interval_update_graph && is_allow_all_graph_update) {
+            dataset_list[id].chart_obj.update();
+          }
         }
 
         // Check if it's time to update graph indicators and update if necessary
@@ -170,16 +170,16 @@ function Data_PY2JS(data) {
         // Update graph indicators to reflect safe range
         Array.from(document.getElementsByClassName(`indicator_${id}`)).forEach((element) => {
           if (!isNaN(parseFloat(dataset_list[id].safe_range_max)) && !isNaN(dataset_list[id].safe_range_min)) {
-          if (dataset_list[id].safe_range_max < new_data) {
-            element.classList.add("danger");
-            element.classList.remove("safe");
-          } else if (dataset_list[id].safe_range_min > new_data) {
-            element.classList.add("danger");
-            element.classList.remove("safe");
-          } else {
-            element.classList.remove("danger");
-            element.classList.add("safe");
-          }
+            if (dataset_list[id].safe_range_max < new_data) {
+              element.classList.add("danger");
+              element.classList.remove("safe");
+            } else if (dataset_list[id].safe_range_min > new_data) {
+              element.classList.add("danger");
+              element.classList.remove("safe");
+            } else {
+              element.classList.remove("danger");
+              element.classList.add("safe");
+            }
           }
         });
       }
@@ -473,18 +473,18 @@ function Get_Initial_Settings(provided_setting_dict) {
     // Insert containers and indicators for each dataset
     Object.keys(dataset_list).forEach(function (id) {
       if (dataset_list[id].is_show_graph === true) {
-      containers.innerHTML += `\
-      <div class="container container_${id}">\
-        <div class="labels">\
-          <span class="name">${dataset_list[id].display_name}</span>\
-          <span class="value value_${id}">-</span>\
-          <span class="unit">${dataset_list[id].unit}</span>\
-        </div>\
-        <div class="chart">\
-          <canvas id="chart_${id}"></canvas>\
-        </div>\
-      </div>\
-      `;
+        containers.innerHTML += `\
+          <div class="container container_${id}">\
+            <div class="labels">\
+              <span class="name">${dataset_list[id].display_name}</span>\
+              <span class="value value_${id}">-</span>\
+              <span class="unit">${dataset_list[id].unit}</span>\
+            </div>\
+            <div class="chart">\
+              <canvas id="chart_${id}"></canvas>\
+            </div>\
+          </div>\
+        `;
       }
       indicators.innerHTML += `\
       <tr class="labels indicator indicator_${id}" onclick="focus_graph_to('${id}');">\
@@ -498,53 +498,53 @@ function Get_Initial_Settings(provided_setting_dict) {
     // Enable each graph
     Object.keys(dataset_list).forEach(function (id) {
       if (dataset_list[id].is_show_graph === true) {
-      let this_canvas = document.getElementById(`chart_${id}`).getContext("2d");
-      dataset_list[id].chart_obj = new Chart(this_canvas, {
-        type: "line",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "Value",
-              data: dataset_list[id].data,
-              fill: true,
-              backgroundColor: "rgba(255, 99, 132, 0.25)",
-              borderWidth: 1,
-              borderColor: "rgb(255, 99, 132)",
-            },
-          ],
-        },
-        options: {
-          pointRadius: 0,
-          animation: {
-            duration: 0,
+        let this_canvas = document.getElementById(`chart_${id}`).getContext("2d");
+        dataset_list[id].chart_obj = new Chart(this_canvas, {
+          type: "line",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: "Value",
+                data: dataset_list[id].data,
+                fill: true,
+                backgroundColor: "rgba(255, 99, 132, 0.25)",
+                borderWidth: 1,
+                borderColor: "rgb(255, 99, 132)",
+              },
+            ],
           },
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
+          options: {
+            pointRadius: 0,
+            animation: {
+              duration: 0,
+            },
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              x: {
+                min: 0,
+                // max: general_settings.interface.graph_max_display,
+                display: true,
+              },
+              y: {
+                min: 0,
+                // max: 100,
+                display: true,
+              },
             },
           },
-          scales: {
-            x: {
-              min: 0,
-              // max: general_settings.interface.graph_max_display,
-              display: true,
-            },
-            y: {
-              min: 0,
-              // max: 100,
-              display: true,
-            },
-          },
-        },
-      });
+        });
       }
     });
 
     // Insert settings
     const setting_tbody = document.getElementById("main_display_settings").getElementsByClassName("change_settings")[0].getElementsByTagName("tbody")[0];
-    const changeable_settings_key = ["interface", "data_logging"];
+    const changeable_settings_key = ["interface", "data_logging", "body"];
     changeable_settings_key.forEach(function (key) {
       if (Object.keys(general_settings).includes(key)) {
         Object.keys(general_settings[key]).forEach(function (id) {
@@ -635,7 +635,7 @@ setInterval(function () {
 }, 10);
 
 let connection_downtime = 0;
-  const timeout_ms = 3000;
+const timeout_ms = 3000;
 setInterval(function () {
   const alert_element = document.getElementById("alert_timeout");
   connection_downtime += 100;
@@ -644,7 +644,7 @@ setInterval(function () {
     alert_element.setAttribute("style", "display: block;");
     if (connection_downtime > timeout_ms * 2) {
       window.close();
-  }
+    }
   } else {
     connection_downtime = 0;
     alert_element.setAttribute("style", "display: none;");
