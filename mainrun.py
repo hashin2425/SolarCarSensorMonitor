@@ -344,6 +344,12 @@ def get_device_list():
 def window_initialize():
     # Windowの起動が完了した段階でJS側から呼び出す
     # Python側の設定(INITIAL_SETTINGS)をJSに送信する
+    thread_update_connection_list = Thread(target=get_device_list)
+    thread_update_connection_list.start()
+    eel.add_remove_notification(IS_DISABLED_BACKGROUND_LOGGING, "IS_DISABLED_BACKGROUND_LOGGING", "L", "[デバッグ機能]ログファイルの生成が停止されています。")  # type: ignore
+    eel.add_remove_notification(IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED, "IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED", "C", "[デバッグ機能]ウィンドウ終了時に、バックエンドシステムが終了されます。")  # type: ignore
+    eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デバッグ機能]ダミーデバイスが有効です。")  # type: ignore
+    eel.add_remove_notification(DEBUG_PRINT_MODE, "DEBUG_PRINT_MODE", "P", "[デバッグ機能]デバッグ情報がコンソールに出力されます。")  # type: ignore
     _ = eel.Get_Initial_Settings(INITIAL_SETTINGS)()  # type:ignore
 
 
@@ -431,19 +437,16 @@ eel.init("interface", allowed_extensions=["eel_js"])
 # ---- Args ----
 # --DisableBackGroundLogging : ログファイルの生成を停止する。デバッグ用
 IS_DISABLED_BACKGROUND_LOGGING = "--DisableBackGroundLogging" in sys.argv
-eel.add_remove_notification(IS_DISABLED_BACKGROUND_LOGGING, "IS_DISABLED_BACKGROUND_LOGGING", "L", "[デバッグ機能]ログファイルの生成が停止されています。")  # type: ignore
 #
 # --ClosePythonWhenWindowClosed : ウィンドウを閉じる時にPythonを終了する
 IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED = "--ClosePythonWhenWindowClosed" in sys.argv
-eel.add_remove_notification(IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED, "IS_CLOSE_PYTHON_WHEN_WINDOW_CLOSED", "C", "[デバッグ機能]ウィンドウ終了時に、バックエンドシステムが終了されます。")  # type: ignore
 #
 # --UseDummyData : ダミーのデバイスを利用できる。デバッグ用
 IS_USE_DUMMY_DATA = "--UseDummyData" in sys.argv
-eel.add_remove_notification(IS_USE_DUMMY_DATA, "IS_USE_DUMMY_DATA", "D", "[デバッグ機能]ダミーデバイスが有効です。")  # type: ignore
 #
 # --DebugPrint : デバッグモード有効時にのみPrintする。デバッグ用
 DEBUG_PRINT_MODE = "--DebugPrint" in sys.argv
-eel.add_remove_notification(DEBUG_PRINT_MODE, "DEBUG_PRINT_MODE", "P", "[デバッグ機能]デバッグ情報がコンソールに出力されます。")  # type: ignore
+
 if not DEBUG_PRINT_MODE:
     # エラーや警告を非表示
     warnings.simplefilter("ignore")
