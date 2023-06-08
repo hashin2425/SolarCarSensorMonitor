@@ -207,8 +207,33 @@ class Connection:
                 if len(parsed_text) > 0:
                     # Update the latest data dictionary
                     new_data_dict = {key: float(value) for key, value in parsed_text[0].items()}
-                    _print(new_data_dict)
                     latest_data_dict.update(new_data_dict)
+
+                    # Calculate values (watts, accumulated power, etc.)
+                    FORMERS = [
+                        'latest_data_dict["motor_ampere"] /= 1000',
+                        'latest_data_dict["motor_volts"] /= 1000',
+                        'latest_data_dict["battery_ampere"] /= 1000',
+                        'latest_data_dict["battery_volts"] /= 1000',
+                        'latest_data_dict["solar_ampere"] /= 1000',
+                        'latest_data_dict["solar_volts"] /= 1000',
+                        'latest_data_dict["motor_watts"] = latest_data_dict["motor_ampere"] * latest_data_dict["motor_volts"]',
+                        'latest_data_dict["solar_watts"] = latest_data_dict["solar_ampere"] * latest_data_dict["solar_volts"]',
+                        'latest_data_dict["battery_watts"] = latest_data_dict["battery_ampere"] * latest_data_dict["battery_volts"]',
+                        'latest_data_dict["body_traveled_distance"] += latest_data_dict["body_speed"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
+                        'latest_data_dict["motor_accumulated_power"] += latest_data_dict["motor_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
+                        'latest_data_dict["solar_accumulated_power"] += latest_data_dict["solar_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
+                        'latest_data_dict["battery_accumulated_power"] += latest_data_dict["battery_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
+                        'latest_data_dict["battery_remain_power_ah"] = INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] - latest_data_dict["battery_accumulated_power"]',
+                        'latest_data_dict["battery_remain_power_percent"] = latest_data_dict["battery_remain_power_ah"] / INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] * 100',
+                    ]
+                    for former in FORMERS:
+                        try:
+                            exec(former)  # execより優れている方法があれば代替したい
+                        except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError) as e:
+                            _print(e)
+
+                    _print(new_data_dict)
                     eel.Data_PY2JS(latest_data_dict)  # type: ignore
                     _print(latest_data_dict)
 
