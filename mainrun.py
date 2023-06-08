@@ -38,6 +38,8 @@ logging_filename: str = ""
 BAUD_RATE = 115200
 
 # ---- 設定項目 ----
+# INITIAL_SETTINGSは初期設定であり、PATH_PRIMARY_SETTINGSに記述されている設定が優先されます。
+# PATH_PRIMARY_SETTINGSにファイルがなければ、初回起動時にINITIAL_SETTINGSの内容がコピーされます。
 PATH_PRIMARY_SETTINGS = "./settings.env.json"
 INITIAL_SETTINGS = {
     "description": {
@@ -186,8 +188,36 @@ class Connection:
             if self.connection_type == "DummyPort":
                 # If using dummy data, generate random data
                 eel.sleep(random.random() / 5)
-                for key in latest_data_dict:
-                    latest_data_dict[key] = max(0, latest_data_dict[key] + int((random.random() * 10) - 5))
+                GIVEN_KEYS = [
+                    "body_speed",
+                    "body_temperature",
+                    "body_regeneration_rate",
+                    "body_accelerator",
+                    "body_break",
+                    "motor_volts",
+                    "motor_ampere",
+                    "motor_temperature",
+                    "battery_volts",
+                    "battery_ampere",
+                    "battery_temperature",
+                    "battery_weak_volts",
+                    "solar_volts",
+                    "solar_ampere",
+                    "solar_temperature",
+                ]
+                for key in GIVEN_KEYS:
+                    if key in latest_data_dict.keys():
+                        latest_data_dict[key] = max(0, latest_data_dict[key] + int((random.random() * 10) - 5))
+                        # 雑に値を設定する（精度や現実性を重視しない）
+                        if "_ampere" in key:
+                            latest_data_dict[key] = random.randrange(90000, 100000)
+                        if "_volts" in key:
+                            latest_data_dict[key] = random.randrange(250000, 350000)
+                        if "_temperature" in key:
+                            latest_data_dict[key] = random.randrange(25, 45)
+                        if "_speed" in key:
+                            latest_data_dict[key] = random.randrange(20, 65)
+
                 data = SEPARATE_VALUE_VALUE.join([f"{key}{SEPARATE_NAME_VALUE}{value}" for key, value in latest_data_dict.items()]) + SEPARATE_VALUE_VALUE + SEPARATE_EACH_UPDATE
             elif self.connection_type == "Serial":
                 # If using serial, read data from the connection
@@ -250,6 +280,7 @@ class Connection:
                             new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "," + latest_timestamp + "\n"
                             file.write(new_line)
                             latest_timestamp = ""
+                self.before_parsed_epoch_sec = time.time()
                 self.received_text = ""
 
 
