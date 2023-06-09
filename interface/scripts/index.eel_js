@@ -88,11 +88,19 @@ function remove_invalid_keys_as_python(given_dictionary) {
   return temp_dict;
 }
 
-function try_convert_to_numeric(string_like) {
-  if (isNaN(parseFloat(string_like))) {
-    return string_like;
+function parse_suitable_types(string_like) {
+  if (string_like === "null") {
+    return null;
+  } else if (string_like === "undefined") {
+    return undefined;
+  } else if (string_like === "true") {
+    return true;
+  } else if (string_like === "false") {
+    return false;
+  } else if (!isNaN(string_like)) {
+    return Number(string_like);
   } else {
-    return parseFloat(string_like);
+    return string_like;
   }
 }
 
@@ -554,13 +562,23 @@ function Get_Initial_Settings(provided_setting_dict) {
             string: "text",
           }[typeof general_settings[key][id]];
 
+          if (value_type === "checkbox") {
+            if (general_settings[key][id] === true) {
+              var attribute_is_checked = "checked";
+            } else {
+              var attribute_is_checked = "";
+            }
+          } else {
+            var attribute_is_checked = "";
+          }
+
           setting_tbody.innerHTML += `\
-            <tr>\
-              <td>${key}.${id}</td>\
-              <td>${provided_setting_dict.description[key][id].replace("\n", "<br>")}</td>\
-              <td>${general_settings[key][id]}</td>\
-              <td><input type="${value_type}" id="setting_${key}_${id}" value="${general_settings[key][id]}"/></td>\
-            </tr>\
+          <tr>\
+          <td>${key}.${id}</td>\
+          <td>${provided_setting_dict.description[key][id].replace("\n", "<br>")}</td>\
+          <td>${general_settings[key][id]}</td>\
+          <td><input type="${value_type}" id="setting_${key}_${id}" value="${general_settings[key][id]}" ${attribute_is_checked}/></td>\
+          </tr>\
           `;
         });
       }
@@ -754,7 +772,11 @@ function apply_new_settings() {
     Array.from(settings_table_body_trs).forEach((tr) => {
       // Get the variable ID and value for the current row
       var variable_id = tr.getElementsByTagName("td")[0].textContent;
-      var variable_value = try_convert_to_numeric(tr.getElementsByTagName("input")[0].value);
+      if (tr.getElementsByTagName("input")[0].type === "checkbox") {
+        var variable_value = tr.getElementsByTagName("input")[0].checked;
+      } else {
+        var variable_value = parse_suitable_types(tr.getElementsByTagName("input")[0].value);
+      }
 
       // Split the variable ID into its parent and child parts
       var variable_id_parent = variable_id.split(".")[0];
