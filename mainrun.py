@@ -92,6 +92,11 @@ INITIAL_SETTINGS = {
         },
     },
 }
+TROUBLE_SHOOTING_GUIDES = {
+    # "エラー文": "解説文",
+    "OSError(22, 'セマフォがタイムアウトしました。": "このポートは無効である可能性があります。",
+    "PermissionError(13, 'アクセスが拒否されました。'": "他のソフトウェアによってポートが使用されている可能性があります。該当するソフトウェアを終了するか、ポートを使用されていない状態にしてください。",
+}
 # ---- 設定項目ここまで ----
 
 
@@ -347,6 +352,13 @@ def get_device_list():
                 temp_response = con.read(999999).decode("utf-8")  # 999999byteまで取得
         except (serial.SerialException, SerialException, KeyError, AttributeError) as error:
             temp_response = str(error)
+            _print(error)
+
+            # トラブルシューティングガイドを付与
+            for key in TROUBLE_SHOOTING_GUIDES.items():
+                if key[0] in temp_response:
+                    temp_response += "<br><br>## トラブルシューティング<br>" + key[1]
+
         finally:
             temp = {device.device: {"name": device.description, "type": "Serial", "response": temp_response, "connected": device.device == now_connection_id}}
             eel.reload_connection_list(temp)  # type:ignore
