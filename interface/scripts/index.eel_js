@@ -5,6 +5,7 @@ let is_received_initial_settings = false;
 let is_now_updating_connection_list = false;
 let unix_before_graph_updated = new Date().getTime();
 let unix_before_data_updated = new Date().getTime();
+let unix_before_connection_updated = new Date().getTime();
 let now_focus_graph_id = "all"; // "all" or value_id
 let large_chart_obj = undefined;
 let is_allow_all_graph_update = true;
@@ -472,6 +473,9 @@ function Get_Initial_Settings(provided_setting_dict) {
 
     // Insert "Show all graphs" button
     indicators.innerHTML += `\
+    <tr class="labels indicator safe">\
+      <td colspan="3" class="name" id="reserve_confirm_text">受信状況がここに表示されます。</td>\
+    </tr>\
       <tr class="labels indicator indicator_all safe" onclick="focus_graph_to('all');">\
         <td style="border-color: black;" colspan="3" class="name">すべてのグラフを表示する</td>\
       </tr>\
@@ -547,7 +551,7 @@ function Get_Initial_Settings(provided_setting_dict) {
           },
         });
       } else {
-        dataset_list[id].chart_obj = {data: {labels: []}};
+        dataset_list[id].chart_obj = { data: { labels: [] } };
       }
     });
 
@@ -646,7 +650,7 @@ function progress_manager(message) {
 
 eel.expose(window_alive_check_fromPy);
 function window_alive_check_fromPy() {
-  unix_before_data_updated = new Date().getTime();
+  unix_before_connection_updated = new Date().getTime();
 }
 
 setInterval(function () {
@@ -654,12 +658,12 @@ setInterval(function () {
 }, 10);
 
 let connection_downtime = 0;
-const timeout_ms = 3000;
 setInterval(function () {
+  const timeout_ms = 3000;
   const alert_element = document.getElementById("alert_timeout");
   connection_downtime += 100;
-  // eel._print(connection_downtime, new Date().getTime() - unix_before_data_updated);
-  if (new Date().getTime() - unix_before_data_updated > timeout_ms) {
+  // eel._print(connection_downtime, new Date().getTime() - unix_before_connection_updated);
+  if (new Date().getTime() - unix_before_connection_updated > timeout_ms) {
     alert_element.setAttribute("style", "display: block;");
     if (connection_downtime > timeout_ms * 2) {
       window.close();
@@ -669,6 +673,15 @@ setInterval(function () {
     alert_element.setAttribute("style", "display: none;");
   }
 }, 100);
+
+setInterval(() => {
+  const timeout_ms = 3000;
+  if (new Date().getTime() - unix_before_data_updated > timeout_ms) {
+    document.getElementById("reserve_confirm_text").textContent = `受信を待機しています(${Math.round((new Date().getTime() - unix_before_data_updated) / 1000)})`;
+  } else {
+    document.getElementById("reserve_confirm_text").textContent = "最新のデータが反映されています。";
+  }
+}, 1000);
 
 // Pythonとの接続ここまで
 
