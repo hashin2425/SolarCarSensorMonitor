@@ -313,6 +313,7 @@ def create_new_logging_file() -> None:
     dir_name = INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"]
     prefix = INITIAL_SETTINGS["values"]["data_logging"]["data_log_filename"]
     logging_filename = f"{dir_name}/{prefix}_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    eel.display_logging_status({"csv_file_path": logging_filename})  # type:ignore
     with open(logging_filename, mode="a", encoding="UTF-8") as file:
         file.write("datetime," + ",".join(latest_data_dict.keys()) + "\n")
 
@@ -440,6 +441,7 @@ def window_alive_check_fromJS():
     # JavaScriptから生存確認を実行する（生存確認が行われた時間の記録はPython側）
     global latest_window_alive_check_epoch
     latest_window_alive_check_epoch = time.time()
+
 
 @eel.expose
 def apply_new_settings_to_python(dictionary: dict):

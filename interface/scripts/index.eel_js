@@ -683,6 +683,14 @@ setInterval(() => {
   }
 }, 1000);
 
+eel.expose(display_logging_status);
+function display_logging_status(status_dict) {
+  console.log(status_dict);
+  if (status_dict.csv_file_path) {
+    document.getElementById("csv_file_path").textContent = `${status_dict.csv_file_path}`;
+  }
+}
+
 // Pythonとの接続ここまで
 
 // 接続先リスト
