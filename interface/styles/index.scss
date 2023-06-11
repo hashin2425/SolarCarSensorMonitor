@@ -162,6 +162,7 @@ $height_footer: 30pt;
                   background-color: $color4;
                 }
                 td {
+                  color: $col_font_black;
                   white-space: nowrap;
                   &.name {
                     border-left: transparent solid 3px;
@@ -229,6 +230,7 @@ $height_footer: 30pt;
           }
         }
         div#large_graphs {
+          color: $col_font_black;
           padding-top: 10px;
           width: 0em; // 初回読み込み時は0にすることでdiv#graphsのwidthを定めさせる
           div#large_graphs_display_name {
