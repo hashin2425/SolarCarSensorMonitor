@@ -141,10 +141,9 @@ function Data_PY2JS(data) {
         // Add new data to dataset
         let new_data = data[id];
         dataset_list[id].data.push(new_data);
+        dataset_list[id].chart_obj.data.labels.push("");
 
         if (dataset_list[id].is_show_graph) {
-          dataset_list[id].chart_obj.data.labels.push("");
-
           // If dataset has exceeded max display limit, remove oldest data point
           if (dataset_list[id].data.length > general_settings.interface.graph_max_display) {
             dataset_list[id].data.shift();
@@ -265,8 +264,8 @@ function focus_graph_to(id) {
         },
         scales: {
           x: {
-            min: 0,
-            // max: general_settings.interface.graph_max_display,
+            min: general_settings.interface.graph_min_display,
+            max: general_settings.interface.graph_max_display,
             display: true,
           },
           y: {
@@ -547,6 +546,8 @@ function Get_Initial_Settings(provided_setting_dict) {
             },
           },
         });
+      } else {
+        dataset_list[id].chart_obj = {data: {labels: []}};
       }
     });
 
