@@ -79,26 +79,27 @@ INITIAL_SETTINGS = {
         "data_list": {
             "body_speed": {"display_name": "機体速度", "unit": "km/h", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 0, "input_sort": 0, "is_show_graph": True},
             "body_traveled_distance": {"display_name": "機体積算移動距離", "unit": "km", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 1, "input_sort": 1},
-            "body_temperature": {"display_name": "機体温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 2, "input_sort": 2, "is_show_graph": True},
+            "body_temperature": {"display_name": "機体温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 2, "input_sort": 2},
             "body_regeneration_rate": {"display_name": "機体回生", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 3, "input_sort": 3},
             "body_accelerator": {"display_name": "機体アクセル", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 4, "input_sort": 4},
             "body_break": {"display_name": "機体ブレーキ", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 5, "input_sort": 5},
             "motor_volts": {"display_name": "モーター電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 6, "input_sort": 6},
             "motor_ampere": {"display_name": "モーター電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 7, "input_sort": 7},
-            "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 8, "input_sort": 8, "is_show_graph": True},
+            "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 8, "input_sort": 8},
             "motor_temperature": {"display_name": "モーター温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 9, "input_sort": 9},
             "motor_accumulated_power": {"display_name": "モーター積算消費電力", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 10, "input_sort": 10},
-            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 11, "input_sort": 11},
-            "battery_ampere": {"display_name": "バッテリー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 12, "input_sort": 12},
-            "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 13, "input_sort": 13, "is_show_graph": True},
-            "battery_temperature": {"display_name": "バッテリー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 14, "input_sort": 14},
+            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 11, "input_sort": 11, "is_show_graph":True},
+            "battery_ampere": {"display_name": "バッテリー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 12, "input_sort": 12, "is_show_graph": True},
+            "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 13, "input_sort": 13},
+            "battery_temperature_R": {"display_name": "バッテリー温度(右)", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 14, "input_sort": 14, "is_show_graph": True},
+            "battery_temperature_L": {"display_name": "バッテリー温度(左)", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 14, "input_sort": 14, "is_show_graph": True},
             "battery_accumulated_power": {"display_name": "バッテリー積算出力電力", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 15, "input_sort": 15},
             "battery_remain_power_percent": {"display_name": "バッテリー残量", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 16, "input_sort": 16},
             "battery_remain_power_ah": {"display_name": "バッテリー残量", "unit": "Ah", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 17, "input_sort": 17, "is_show_graph": True},
             "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 18, "input_sort": 18},
-            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 19, "input_sort": 19},
-            "solar_ampere": {"display_name": "ソーラー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 20, "input_sort": 20},
-            "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 21, "input_sort": 21, "is_show_graph": True},
+            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 19, "input_sort": 19, "is_show_graph":True},
+            "solar_ampere": {"display_name": "ソーラー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 20, "input_sort": 20, "is_show_graph": True},
+            "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 21, "input_sort": 21},
             "solar_temperature": {"display_name": "ソーラー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 22, "input_sort": 22},
             "solar_accumulated_power": {"display_name": "ソーラー積算発電量", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 23, "input_sort": 23},
         },
@@ -192,10 +193,9 @@ class Connection:
         Returns:
             None
         """
-        global latest_timestamp
-        SEPARATE_NAME_VALUE = ":"
-        SEPARATE_VALUE_VALUE = "#"
-        SEPARATE_EACH_UPDATE = "*"
+        global latest_timestamp, latest_ID
+        SEPARATE_VALUE_VALUE = ","
+        SEPARATE_EACH_UPDATE = "#"
 
         while self.is_enabled_connection:
             eel.sleep(0.05)
@@ -252,6 +252,9 @@ class Connection:
 
                     # Calculate values (watts, accumulated power, etc.)
                     FORMERS = [
+                        'latest_data_dict["body_speed"] = latest_data_dict["body_speed"] / 48 * 1730 / 1000000 * 3600',
+                        'latest_data_dict["battery_temperature_R"] = 1 / (1 / (25 + 273.15) + math.log(latest_data_dict["battery_temperature_R"] / (1024 - latest_data_dict["battery_temperature_R"]), 10) / 3435) - 273.15',
+                        'latest_data_dict["battery_temperature_L"] = 1 / (1 / (25 + 273.15) + math.log(latest_data_dict["battery_temperature_L"] / (1024 - latest_data_dict["battery_temperature_L"]), 10) / 3435) - 273.15',
                         'latest_data_dict["motor_ampere"] /= 1000',
                         'latest_data_dict["motor_volts"] /= 1000',
                         'latest_data_dict["battery_ampere"] /= 1000',
