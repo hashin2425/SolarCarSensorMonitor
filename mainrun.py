@@ -17,11 +17,6 @@ from threading import Thread
 import eel  # 起動時にかかる時間の16％が費やされている
 
 
-# https://pypi.org/project/pybluez2/
-# pip install pybluez2
-import bluetooth
-
-
 # https://pypi.org/project/pyserial/
 # pip install pyserial
 import serial
@@ -88,7 +83,7 @@ INITIAL_SETTINGS = {
             "motor_watts": {"display_name": "モーター電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 8, "input_sort": 8},
             "motor_temperature": {"display_name": "モーター温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 9, "input_sort": 9},
             "motor_accumulated_power": {"display_name": "モーター積算消費電力", "unit": "Wh", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 10, "input_sort": 10},
-            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 11, "input_sort": 11, "is_show_graph":True},
+            "battery_volts": {"display_name": "バッテリー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 11, "input_sort": 11, "is_show_graph": True},
             "battery_ampere": {"display_name": "バッテリー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 12, "input_sort": 12, "is_show_graph": True},
             "battery_watts": {"display_name": "バッテリー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 13, "input_sort": 13},
             "battery_temperature_R": {"display_name": "バッテリー温度(右)", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 14, "input_sort": 14, "is_show_graph": True},
@@ -97,7 +92,7 @@ INITIAL_SETTINGS = {
             "battery_remain_power_percent": {"display_name": "バッテリー残量", "unit": "%", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 16, "input_sort": 16},
             "battery_remain_power_ah": {"display_name": "バッテリー残量", "unit": "Ah", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 17, "input_sort": 17, "is_show_graph": True},
             "battery_weak_volts": {"display_name": "バッテリー弱電電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 18, "input_sort": 18},
-            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 19, "input_sort": 19, "is_show_graph":True},
+            "solar_volts": {"display_name": "ソーラー電圧", "unit": "V", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 19, "input_sort": 19, "is_show_graph": True},
             "solar_ampere": {"display_name": "ソーラー電流", "unit": "A", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 20, "input_sort": 20, "is_show_graph": True},
             "solar_watts": {"display_name": "ソーラー電力", "unit": "W", "safe_range_min": 0, "safe_range_max": 2, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 21, "input_sort": 21},
             "solar_temperature": {"display_name": "ソーラー温度", "unit": "℃", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 22, "input_sort": 22},
@@ -136,7 +131,6 @@ class Connection:
     """
 
     connection_serial: serial.Serial
-    connection_bluetooth: bluetooth.BluetoothSocket
     connect_to_id: str = "None"
     connection_type: str = "None"
     received_text: str = ""
@@ -155,11 +149,6 @@ class Connection:
         if device_dict[self.connect_to_id]["type"] == "Serial":
             self.connection_type = "Serial"
             self.connection_serial = serial.Serial(self.connect_to_id, BAUD_RATE, timeout=1)
-        # Bluetooth
-        elif device_dict[self.connect_to_id]["type"] == "Bluetooth":
-            self.connection_type = "Bluetooth"
-            self.connection_bluetooth = bluetooth.BluetoothSocket(bluetooth.RFCOMM)  # type:ignore
-            self.connection_bluetooth.connect((self.connect_to_id, 1))
         # 通信開始
         self.thread_receive_data = Thread(target=self.connection_observer)
         self.thread_receive_data.start()
@@ -179,9 +168,6 @@ class Connection:
         # Serial
         if self.connection_type == "Serial":
             self.connection_serial.close()
-        # Bluetooth
-        elif self.connection_type == "Bluetooth":
-            self.connection_bluetooth.close()
         eel.add_remove_notification(False, "CONNECTION_ESTABLISHED", "C", "接続が成功しました。")  # type: ignore
 
     def connection_observer(self) -> None:
@@ -226,9 +212,6 @@ class Connection:
             elif self.connection_type == "Serial":
                 # If using serial, read data from the connection
                 data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
-            elif self.connection_type == "Bluetooth":
-                # If using bluetooth, read data from the connection
-                data = self.connection_bluetooth.recv(1024).decode("utf-8")
 
             # Send the data
             if len(data) > 0:
@@ -274,7 +257,7 @@ class Connection:
                     for former in FORMERS:
                         try:
                             exec(former)  # execより優れている方法があれば代替したい
-                        except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError) as e:
+                        except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
                             _print(e)
 
                     _print(new_data_dict)
@@ -292,7 +275,8 @@ class Connection:
                             new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "," + latest_timestamp + "\n"
                             file.write(new_line)
                             latest_timestamp = ""
-                if "ID" in new_data_dict: latest_ID = new_data_dict["ID"]
+                if "ID" in new_data_dict:
+                    latest_ID = new_data_dict["ID"]
                 self.before_parsed_epoch_sec = time.time()
                 self.received_text = ""
 
@@ -371,21 +355,6 @@ def get_device_list():
             temp = {device.device: {"name": device.description, "type": "Serial", "response": temp_response, "connected": device.device == now_connection_id}}
             eel.reload_connection_list(temp)  # type:ignore
             device_dict = device_dict | temp
-
-    # Bluetooth
-    # 仕様変更に付き、一時的にコメントアウトする。あとで有効/無効の切り替えをできるようにする
-    # for device in bluetooth.discover_devices(lookup_names=True, lookup_class=False):  # ここで10秒くらいかかる
-    #     temp_response = "Timeout"
-    #     try:
-    #         with bluetooth.BluetoothSocket(bluetooth.RFCOMM) as con:  # type: ignore
-    #             con.connect((device[0], 1))
-    #             temp_response = con.recv(1024).decode("utf-8")
-    #     except (bluetooth.BluetoothError, AttributeError, KeyError) as error:
-    #         temp_response = str(error)
-    #     finally:
-    #         temp = {device[0]: {"name": device[1], "type": "Bluetooth", "response": temp_response, "connected": device[0] == now_connection_id}}
-    #         eel.reload_connection_list(temp)  # type:ignore
-    #         device_dict = device_dict | temp
 
     eel.progress_manager("connection_list_update_done")  # type:ignore
 
