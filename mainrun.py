@@ -4,6 +4,7 @@ import re
 import os
 import sys
 import time
+import math
 import random
 import warnings
 import tracemalloc
@@ -30,12 +31,13 @@ from serial.serialutil import SerialException
 latest_window_alive_check_epoch: float = time.time()
 latest_data_dict: dict = dict()  # 最新のデータのみを格納する
 latest_timestamp: str = ""
+latest_ID: int = 1
 device_dict: dict = dict()
 is_window_shown: bool = False
 is_continue_receive_send_data: bool = True
 main_connection = None
 logging_filename: str = ""
-BAUD_RATE = 115200
+BAUD_RATE = 9600
 
 # ---- 設定項目 ----
 # INITIAL_SETTINGSは初期設定であり、PATH_PRIMARY_SETTINGSに記述されている設定が優先されます。
@@ -64,6 +66,16 @@ INITIAL_SETTINGS = {
         },
         "data_logging": {"data_log_dir": "store", "data_log_filename": "log"},
         "body": {"initial_battery_ah": 4000},
+        "data_sort": [
+            "battery_volts",
+            "battery_ampere",
+            "solar_volts",
+            "solar_ampere",
+            "body_speed",
+            "battery_temperature_R",
+            "battery_temperature_L",
+            "ID",
+        ],
         "data_list": {
             "body_speed": {"display_name": "機体速度", "unit": "km/h", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 0, "input_sort": 0, "is_show_graph": True},
             "body_traveled_distance": {"display_name": "機体積算移動距離", "unit": "km", "safe_range_min": -10000, "safe_range_max": 10000, "y_lim_min": 0, "y_lim_max": 100, "display_sort": 1, "input_sort": 1},
@@ -193,37 +205,24 @@ class Connection:
             if self.connection_type == "DummyPort":
                 # If using dummy data, generate random data
                 eel.sleep(random.random() / 5)
-                GIVEN_KEYS = [
-                    "body_speed",
-                    "body_temperature",
-                    "body_regeneration_rate",
-                    "body_accelerator",
-                    "body_break",
-                    "motor_volts",
-                    "motor_ampere",
-                    "motor_temperature",
-                    "battery_volts",
-                    "battery_ampere",
-                    "battery_temperature",
-                    "battery_weak_volts",
-                    "solar_volts",
-                    "solar_ampere",
-                    "solar_temperature",
-                ]
-                for key in GIVEN_KEYS:
-                    if key in latest_data_dict.keys():
-                        latest_data_dict[key] = max(0, latest_data_dict[key] + int((random.random() * 10) - 5))
-                        # 雑に値を設定する（精度や現実性を重視しない）
-                        if "_ampere" in key:
-                            latest_data_dict[key] = random.randrange(90000, 100000)
-                        if "_volts" in key:
-                            latest_data_dict[key] = random.randrange(250000, 350000)
-                        if "_temperature" in key:
-                            latest_data_dict[key] = random.randrange(25, 45)
-                        if "_speed" in key:
-                            latest_data_dict[key] = random.randrange(20, 65)
+                latest_ID += 1
+                dummy_data_temp = list()
+                for key in INITIAL_SETTINGS["values"]["data_sort"]:
+                    # 雑に値を設定する（精度や現実性を重視しない）
+                    if "_ampere" in key:
+                        dummy_data_temp.append(random.randrange(90000, 100000))
+                    elif "_volts" in key:
+                        dummy_data_temp.append(random.randrange(250000, 350000))
+                    elif "_temperature" in key:
+                        dummy_data_temp.append(random.randrange(100, 1000))
+                    elif "_speed" in key:
+                        dummy_data_temp.append(random.randrange(20, 65))
+                    elif "ID" in key:
+                        dummy_data_temp.append(latest_ID)
+                    else:
+                        dummy_data_temp.append(max(0, latest_data_dict[key] + int((random.random() * 10) - 5)))
+                data = SEPARATE_VALUE_VALUE.join(map(str, dummy_data_temp)) + SEPARATE_EACH_UPDATE
 
-                data = SEPARATE_VALUE_VALUE.join([f"{key}{SEPARATE_NAME_VALUE}{value}" for key, value in latest_data_dict.items()]) + SEPARATE_VALUE_VALUE + SEPARATE_EACH_UPDATE
             elif self.connection_type == "Serial":
                 # If using serial, read data from the connection
                 data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
@@ -233,17 +232,22 @@ class Connection:
 
             # Send the data
             if len(data) > 0:
-                self.received_text += data.replace("\r", "").replace("\n", "#")
+                self.received_text += data.replace("\r", "").replace("\n", SEPARATE_EACH_UPDATE)
                 _print(self.received_text)
 
-            is_do_update_graph = SEPARATE_EACH_UPDATE in self.received_text or latest_timestamp != ""
+            is_do_update_graph = (SEPARATE_VALUE_VALUE in self.received_text and SEPARATE_EACH_UPDATE in self.received_text) or latest_timestamp != ""
             if is_do_update_graph:
                 # Parse the received text
-                parsed_text = [dict([x.split(SEPARATE_NAME_VALUE) for x in y.split(SEPARATE_VALUE_VALUE) if SEPARATE_NAME_VALUE in x]) for y in self.received_text.split(SEPARATE_EACH_UPDATE)]
-                _print(parsed_text)
-                if len(parsed_text) > 0:
+                new_data_dict = dict()
+                for i, key in enumerate(self.received_text.split(SEPARATE_VALUE_VALUE)):
+                    if i < len(INITIAL_SETTINGS["values"]["data_sort"]):
+                        new_data_dict[INITIAL_SETTINGS["values"]["data_sort"][i]] = float(re.sub(r"[^0-9.]", "", key))
+                _print(new_data_dict)
+
+                is_ID_stepped = int(new_data_dict["ID"]) == int(latest_ID)
+                _print(latest_ID, new_data_dict["ID"], is_ID_stepped)
+                if len(new_data_dict) > 0 and is_ID_stepped:
                     # Update the latest data dictionary
-                    new_data_dict = {key: float(value) for key, value in parsed_text[0].items()}
                     latest_data_dict.update(new_data_dict)
 
                     # Calculate values (watts, accumulated power, etc.)
@@ -285,6 +289,7 @@ class Connection:
                             new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "," + latest_timestamp + "\n"
                             file.write(new_line)
                             latest_timestamp = ""
+                if "ID" in new_data_dict: latest_ID = new_data_dict["ID"]
                 self.before_parsed_epoch_sec = time.time()
                 self.received_text = ""
 
