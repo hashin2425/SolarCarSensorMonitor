@@ -8,7 +8,8 @@
         "pyserial",
         "RFCOMM",
         "chartjs",
-        "println"
+        "println",
+        "colspan"
     ],
     "editor.formatOnSave": true,
     // Python
