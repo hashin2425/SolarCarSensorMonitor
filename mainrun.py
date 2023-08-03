@@ -37,6 +37,10 @@ BAUD_RATE = 9600
 # ---- 設定項目 ----
 # INITIAL_SETTINGSは初期設定であり、PATH_PRIMARY_SETTINGSに記述されている設定が優先されます。
 # PATH_PRIMARY_SETTINGSにファイルがなければ、初回起動時にINITIAL_SETTINGSの内容がコピーされます。
+TIRE_PULSE_PER_CYCLE = 48  # タイヤが一回転するごとに発生するパルス量
+TIRE_CIRCUMFERENCE_MM = 1730  # タイヤの円周(ミリメートル)
+KELVIN = 273.15  # 0度のときの絶対温度
+
 PATH_PRIMARY_SETTINGS = "./settings.env.json"
 INITIAL_SETTINGS = {
     "description": {
@@ -242,39 +246,35 @@ class Connection:
                     latest_data_dict.update(new_data_dict)
 
                     # Calculate values (watts, accumulated power, etc.)
-                    FORMERS = [
-                        'latest_data_dict["battery_volts"] = latest_data_dict["raw_battery_volts"]',
-                        'latest_data_dict["battery_ampere"] = latest_data_dict["raw_battery_ampere"]',
-                        'latest_data_dict["solar_volts"] = latest_data_dict["raw_solar_volts"]',
-                        'latest_data_dict["solar_ampere"] = latest_data_dict["raw_solar_ampere"]',
-                        'latest_data_dict["body_speed"] = latest_data_dict["raw_body_speed"]',
-                        'latest_data_dict["battery_temperature_R"] = latest_data_dict["raw_battery_temperature_R"]',
-                        'latest_data_dict["battery_temperature_L"] = latest_data_dict["raw_battery_temperature_L"]',
-                        'latest_data_dict["ID"] = latest_data_dict["raw_ID"]',
-                        'latest_data_dict["body_speed"] = latest_data_dict["body_speed"] / 48 * 1730 / 1000000 * 3600',
-                        'latest_data_dict["battery_temperature_R"] = 1 / (1 / (25 + 273.15) + math.log(latest_data_dict["battery_temperature_R"] / (1024 - latest_data_dict["battery_temperature_R"]), 10) / 3435) - 273.15',
-                        'latest_data_dict["battery_temperature_L"] = 1 / (1 / (25 + 273.15) + math.log(latest_data_dict["battery_temperature_L"] / (1024 - latest_data_dict["battery_temperature_L"]), 10) / 3435) - 273.15',
-                        'latest_data_dict["motor_ampere"] *= 3.33 / 1000',
-                        'latest_data_dict["motor_volts"] *= 1.25 * 4 / 1000',
-                        'latest_data_dict["battery_ampere"] *= 3.33 / 1000',
-                        'latest_data_dict["battery_volts"] *= 1.25 * 4 / 1000',
-                        'latest_data_dict["solar_ampere"] *= 3.33 / 1000',
-                        'latest_data_dict["solar_volts"] *= 1.25 * 4 / 1000',
-                        'latest_data_dict["motor_watts"] = latest_data_dict["motor_ampere"] * latest_data_dict["motor_volts"]',
-                        'latest_data_dict["solar_watts"] = latest_data_dict["solar_ampere"] * latest_data_dict["solar_volts"]',
-                        'latest_data_dict["battery_watts"] = latest_data_dict["battery_ampere"] * latest_data_dict["battery_volts"]',
-                        'latest_data_dict["body_traveled_distance"] += latest_data_dict["body_speed"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
-                        'latest_data_dict["motor_accumulated_power"] += latest_data_dict["motor_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
-                        'latest_data_dict["solar_accumulated_power"] += latest_data_dict["solar_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
-                        'latest_data_dict["battery_accumulated_power"] += latest_data_dict["battery_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600',
-                        'latest_data_dict["battery_remain_power_ah"] = INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] - latest_data_dict["battery_accumulated_power"]',
-                        'latest_data_dict["battery_remain_power_percent"] = latest_data_dict["battery_remain_power_ah"] / INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] * 100',
-                    ]
-                    for former in FORMERS:
-                        try:
-                            exec(former)  # execより優れている方法があれば代替したい
-                        except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
-                            _print(e)
+                    try:
+                        latest_data_dict["battery_volts"] = latest_data_dict["raw_battery_volts"]
+                        latest_data_dict["battery_ampere"] = latest_data_dict["raw_battery_ampere"]
+                        latest_data_dict["solar_volts"] = latest_data_dict["raw_solar_volts"]
+                        latest_data_dict["solar_ampere"] = latest_data_dict["raw_solar_ampere"]
+                        latest_data_dict["body_speed"] = latest_data_dict["raw_body_speed"]
+                        latest_data_dict["battery_temperature_R"] = latest_data_dict["raw_battery_temperature_R"]
+                        latest_data_dict["battery_temperature_L"] = latest_data_dict["raw_battery_temperature_L"]
+                        latest_data_dict["ID"] = latest_data_dict["raw_ID"]
+                        latest_data_dict["body_speed"] = latest_data_dict["body_speed"] / TIRE_PULSE_PER_CYCLE * TIRE_CIRCUMFERENCE_MM / 1000000 * 3600
+                        latest_data_dict["battery_temperature_R"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_R"] / (1024 - latest_data_dict["battery_temperature_R"]), 10) / 3435) - KELVIN
+                        latest_data_dict["battery_temperature_L"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_L"] / (1024 - latest_data_dict["battery_temperature_L"]), 10) / 3435) - KELVIN
+                        latest_data_dict["motor_ampere"] *= 3.33 / 1000
+                        latest_data_dict["motor_volts"] *= 1.25 * 4 / 1000
+                        latest_data_dict["battery_ampere"] *= 3.33 / 1000
+                        latest_data_dict["battery_volts"] *= 1.25 * 4 / 1000
+                        latest_data_dict["solar_ampere"] *= 3.33 / 1000
+                        latest_data_dict["solar_volts"] *= 1.25 * 4 / 1000
+                        latest_data_dict["motor_watts"] = latest_data_dict["motor_ampere"] * latest_data_dict["motor_volts"]
+                        latest_data_dict["solar_watts"] = latest_data_dict["solar_ampere"] * latest_data_dict["solar_volts"]
+                        latest_data_dict["battery_watts"] = latest_data_dict["battery_ampere"] * latest_data_dict["battery_volts"]
+                        latest_data_dict["body_traveled_distance"] += latest_data_dict["body_speed"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                        latest_data_dict["motor_accumulated_power"] += latest_data_dict["motor_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                        latest_data_dict["solar_accumulated_power"] += latest_data_dict["solar_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                        latest_data_dict["battery_accumulated_power"] += latest_data_dict["battery_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                        latest_data_dict["battery_remain_power_ah"] = INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] - latest_data_dict["battery_accumulated_power"]
+                        latest_data_dict["battery_remain_power_percent"] = latest_data_dict["battery_remain_power_ah"] / INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] * 100
+                    except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
+                        _print(e)
 
                     _print(new_data_dict)
                     eel.Data_PY2JS(latest_data_dict)  # type: ignore
