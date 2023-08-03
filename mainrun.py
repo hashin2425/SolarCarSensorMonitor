@@ -288,7 +288,7 @@ class Connection:
                             create_new_logging_file()
 
                         with open(logging_filename, mode="a", encoding="UTF-8") as file:
-                            new_line = str(dt.now()) + ",".join([str(num) for num in latest_data_dict.values()]) + "," + latest_timestamp + "\n"
+                            new_line = str(dt.now()) + "," + ",".join([str(latest_data_dict[key]) for key in sorted(latest_data_dict.keys())]) + "," + latest_timestamp + "\n"
                             file.write(new_line)
                             latest_timestamp = ""
                 if "ID" in new_data_dict:
@@ -328,7 +328,7 @@ def create_new_logging_file() -> None:
     logging_filename = f"{dir_name}/{prefix}_{dt.now().strftime('%Y%m%d_%H%M%S')}.csv"
     eel.display_logging_status({"csv_file_path": logging_filename})  # type:ignore
     with open(logging_filename, mode="a", encoding="UTF-8") as file:
-        file.write("datetime," + ",".join(latest_data_dict.keys()) + "\n")
+        file.write("datetime," + ",".join(sorted(latest_data_dict.keys())) + "\n")
 
 
 @eel.expose
