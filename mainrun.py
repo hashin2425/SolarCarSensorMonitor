@@ -517,7 +517,10 @@ _print("Args:", sys.argv)
 if __name__ == "__main__":
     # CSVファイルの保存先ディレクトリを生成
     if not os.path.exists(INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"]):
-        os.mkdir(INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"])
+        try:
+            os.mkdir(INITIAL_SETTINGS["values"]["data_logging"]["data_log_dir"])
+        except PermissionError:
+            print("ログファイルの保存先ディレクトリを作成できません。\nアプリ修了後に、アプリ(EXEファイル)をZipファイルから解凍して、実行してください。")
 
     # load setting.json
     for k in INITIAL_SETTINGS["values"]["data_list"]:
