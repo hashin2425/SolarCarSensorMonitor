@@ -37,7 +37,7 @@ BAUD_RATE = 9600
 # ---- 設定項目 ----
 # INITIAL_SETTINGSは初期設定であり、PATH_PRIMARY_SETTINGSに記述されている設定が優先されます。
 # PATH_PRIMARY_SETTINGSにファイルがなければ、初回起動時にINITIAL_SETTINGSの内容がコピーされます。
-TIRE_PULSE_PER_CYCLE = 48  # タイヤが一回転するごとに発生するパルス量
+TIRE_PULSE_PER_CYCLE = 3  # タイヤが一回転するごとに発生するパルス量
 TIRE_CIRCUMFERENCE_MM = 1730  # タイヤの円周(ミリメートル)
 KELVIN = 273.15  # 0度のときの絶対温度
 
