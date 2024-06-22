@@ -343,6 +343,7 @@ function on_clicked_header_button(comment) {
       hide_container();
       document.getElementById("header_show_graphs").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
+      document.getElementById("graphs").setAttribute("style", "display:flex;");
     }
     // Show the values without graphs
     if ("show_values" == comment) {
