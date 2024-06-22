@@ -344,6 +344,15 @@ function on_clicked_header_button(comment) {
       document.getElementById("header_show_graphs").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
     }
+    // Show the values without graphs
+    if ("show_values" == comment) {
+      is_allow_all_graph_update = true;
+      hide_container();
+      document.getElementById("header_show_values").classList.add("displayed");
+      document.getElementById("main_graphs").setAttribute("style", "display:flex;");
+      document.getElementById("graphs").setAttribute("style", "display:none;");
+
+    }
     // Show the graphs
     if ("show_input_settings" == comment) {
       is_allow_all_graph_update = true;
