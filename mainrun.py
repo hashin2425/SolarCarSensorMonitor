@@ -247,7 +247,6 @@ class Connection:
                                 latest_data_dict[key] = 0
                             dummy_data_temp.append(max(0, latest_data_dict[key] + int((random.random() * 10) - 5)))
                     data = SEPARATE_VALUE_VALUE.join(map(str, dummy_data_temp)) + SEPARATE_EACH_UPDATE
-                    print(data)
 
                 elif self.connection_type == "Serial":
                     # If using serial, read data from the connection
