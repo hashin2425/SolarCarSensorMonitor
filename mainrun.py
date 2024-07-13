@@ -237,11 +237,16 @@ class Connection:
                         dummy_data_temp.append(random.randrange(20, 65))
                     elif "ID" in key:
                         dummy_data_temp.append(latest_ID)
+                    elif "datetime" in key:
+                        dummy_data_temp.append(f"{dt.now().month}/{dt.now().day}/{dt.now().hour}:{dt.now().minute}:{dt.now().second}")
+                    elif "SC" in key:
+                        dummy_data_temp.append(random.randrange(0, 100))
                     else:
                         if key not in latest_data_dict:
                             latest_data_dict[key] = 0
                         dummy_data_temp.append(max(0, latest_data_dict[key] + int((random.random() * 10) - 5)))
                 data = SEPARATE_VALUE_VALUE.join(map(str, dummy_data_temp)) + SEPARATE_EACH_UPDATE
+                print(data)
 
             elif self.connection_type == "Serial":
                 # If using serial, read data from the connection
@@ -258,7 +263,21 @@ class Connection:
                 new_data_dict = dict()
                 for i, key in enumerate(self.received_text.split(SEPARATE_VALUE_VALUE)):
                     if i < len(INITIAL_SETTINGS["values"]["data_sort"]):
-                        new_data_dict[INITIAL_SETTINGS["values"]["data_sort"][i]] = float(re.sub(r"[^0-9.]", "", key))
+                        # parse
+                        new_key = None
+                        try:
+                            if INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_datetime":
+                                new_key = dt.strptime(key, "%m/%d/%H:%M:%S")
+                                new_key = new_key.replace(year=dt.now().year)
+                                new_key = new_key.strftime("%y/%m/%d %H:%M:%S")
+                                print(new_key)
+                            elif INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_SC":
+                                new_key = key
+                            else:
+                                new_key = float(re.sub(r"[^0-9.]", "", key))
+                        except ValueError:
+                            new_key = None
+                        new_data_dict[INITIAL_SETTINGS["values"]["data_sort"][i]] = new_key
                 _print(new_data_dict)
 
                 is_ID_stepped = True  # int(new_data_dict["ID"]) == int(latest_ID)
@@ -303,7 +322,7 @@ class Connection:
                         latest_data_dict["latitude"] = latest_data_dict["raw_latitude"]
                         latest_data_dict["longitude"] = latest_data_dict["raw_longitude"]
                         latest_data_dict["datetime"] = latest_data_dict["raw_datetime"]
-                        latest_data_dict["SC"] = latest_data_dict["raw_SC"]
+                        latest_data_dict["raw_SC"] = latest_data_dict["raw_SC"]
                     except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
                         _print(e)
 
