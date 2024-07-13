@@ -161,6 +161,7 @@ function Data_PY2JS(data) {
         // Check if it's time to update graph indicators and update if necessary
         if (is_interval_update_graph) {
           Array.from(document.getElementsByClassName(`value_${id}`)).forEach((element) => {
+            element.textContent = new_data;
             var before_value = parseFloat(element.textContent);
 
             // Change color if value has changed
@@ -171,7 +172,7 @@ function Data_PY2JS(data) {
             }
 
             // Update displayed value
-            element.innerHTML = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3-digit comma separator, display up to 2 decimal places
+            element.textContent = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3-digit comma separator, display up to 2 decimal places
           });
         }
 
