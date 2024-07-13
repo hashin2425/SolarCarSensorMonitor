@@ -172,7 +172,11 @@ function Data_PY2JS(data) {
             }
 
             // Update displayed value
-            element.textContent = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3-digit comma separator, display up to 2 decimal places
+            try {
+              element.textContent = new_data.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"); // 3-digit comma separator, display up to 2 decimal places}
+            } catch (e) {
+              element.textContent = new_data;
+            }
           });
         }
 
@@ -353,7 +357,6 @@ function on_clicked_header_button(comment) {
       document.getElementById("header_show_values").classList.add("displayed");
       document.getElementById("main_graphs").setAttribute("style", "display:flex;");
       document.getElementById("graphs").setAttribute("style", "display:none;");
-
     }
     // Show the graphs
     if ("show_input_settings" == comment) {
