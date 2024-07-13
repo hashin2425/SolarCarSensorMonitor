@@ -216,135 +216,139 @@ class Connection:
         SEPARATE_EACH_UPDATE = ",F"
 
         while self.is_enabled_connection:
-            eel.sleep(0.05)
-            data = ""
+            try:
+                eel.sleep(0.05)
+                data = ""
 
-            # Get the latest data
-            if self.connection_type == "DummyPort":
-                # If using dummy data, generate random data
-                eel.sleep(random.random() / 5)
-                latest_ID += 1
-                dummy_data_temp = list()
-                for key in INITIAL_SETTINGS["values"]["data_sort"]:
-                    # 雑に値を設定する（精度や現実性を重視しない）
-                    if "_ampere" in key:
-                        dummy_data_temp.append(random.randrange(90000, 100000))
-                    elif "_volts" in key:
-                        dummy_data_temp.append(random.randrange(250000, 350000))
-                    elif "_temperature" in key:
-                        dummy_data_temp.append(random.randrange(100, 1000))
-                    elif "_speed" in key:
-                        dummy_data_temp.append(random.randrange(20, 65))
-                    elif "ID" in key:
-                        dummy_data_temp.append(latest_ID)
-                    elif "datetime" in key:
-                        dummy_data_temp.append(f"{dt.now().month}/{dt.now().day}/{dt.now().hour}:{dt.now().minute}:{dt.now().second}")
-                    elif "SC" in key:
-                        dummy_data_temp.append(random.randrange(0, 100))
-                    else:
-                        if key not in latest_data_dict:
-                            latest_data_dict[key] = 0
-                        dummy_data_temp.append(max(0, latest_data_dict[key] + int((random.random() * 10) - 5)))
-                data = SEPARATE_VALUE_VALUE.join(map(str, dummy_data_temp)) + SEPARATE_EACH_UPDATE
-                print(data)
+                # Get the latest data
+                if self.connection_type == "DummyPort":
+                    # If using dummy data, generate random data
+                    eel.sleep(random.random() / 5)
+                    latest_ID += 1
+                    dummy_data_temp = list()
+                    for key in INITIAL_SETTINGS["values"]["data_sort"]:
+                        # 雑に値を設定する（精度や現実性を重視しない）
+                        if "_ampere" in key:
+                            dummy_data_temp.append(random.randrange(90000, 100000))
+                        elif "_volts" in key:
+                            dummy_data_temp.append(random.randrange(250000, 350000))
+                        elif "_temperature" in key:
+                            dummy_data_temp.append(random.randrange(100, 1000))
+                        elif "_speed" in key:
+                            dummy_data_temp.append(random.randrange(20, 65))
+                        elif "ID" in key:
+                            dummy_data_temp.append(latest_ID)
+                        elif "datetime" in key:
+                            dummy_data_temp.append(f"{dt.now().month}/{dt.now().day}/{dt.now().hour}:{dt.now().minute}:{dt.now().second}")
+                        elif "SC" in key:
+                            dummy_data_temp.append(random.randrange(0, 100))
+                        else:
+                            if key not in latest_data_dict:
+                                latest_data_dict[key] = 0
+                            dummy_data_temp.append(max(0, latest_data_dict[key] + int((random.random() * 10) - 5)))
+                    data = SEPARATE_VALUE_VALUE.join(map(str, dummy_data_temp)) + SEPARATE_EACH_UPDATE
+                    print(data)
 
-            elif self.connection_type == "Serial":
-                # If using serial, read data from the connection
-                data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
+                elif self.connection_type == "Serial":
+                    # If using serial, read data from the connection
+                    data = self.connection_serial.read(999999).decode("utf-8")  # Up to 999999 bytes # Takes about 0.5-1 sec to process?
 
-            # Send the data
-            if len(data) > 0:
-                self.received_text += data.replace("H,", "").replace("\r", "").replace("\n", "")
-                _print(self.received_text)
+                # Send the data
+                if len(data) > 0:
+                    self.received_text += data.replace("H,", "").replace("\r", "").replace("\n", "")
+                    _print(self.received_text)
 
-            is_do_update_graph = (SEPARATE_VALUE_VALUE in self.received_text and SEPARATE_EACH_UPDATE in self.received_text) or latest_timestamp != ""
-            if is_do_update_graph:
-                # Parse the received text
-                new_data_dict = dict()
-                for i, key in enumerate(self.received_text.split(SEPARATE_VALUE_VALUE)):
-                    if i < len(INITIAL_SETTINGS["values"]["data_sort"]):
-                        # parse
-                        new_key = None
-                        try:
-                            if INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_datetime":
-                                new_key = dt.strptime(key, "%m/%d/%H:%M:%S")
-                                new_key = new_key.replace(year=dt.now().year)
-                                new_key = new_key.strftime("%y/%m/%d %H:%M:%S")
-                                print(new_key)
-                            elif INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_SC":
-                                new_key = key
-                            else:
-                                new_key = float(re.sub(r"[^0-9.]", "", key))
-                        except ValueError:
+                is_do_update_graph = (SEPARATE_VALUE_VALUE in self.received_text and SEPARATE_EACH_UPDATE in self.received_text) or latest_timestamp != ""
+                if is_do_update_graph:
+                    # Parse the received text
+                    new_data_dict = dict()
+                    for i, key in enumerate(self.received_text.split(SEPARATE_VALUE_VALUE)):
+                        if i < len(INITIAL_SETTINGS["values"]["data_sort"]):
+                            # parse
                             new_key = None
-                        new_data_dict[INITIAL_SETTINGS["values"]["data_sort"][i]] = new_key
-                _print(new_data_dict)
-
-                is_ID_stepped = True  # int(new_data_dict["ID"]) == int(latest_ID)
-                _print(latest_ID, new_data_dict["raw_ID"], is_ID_stepped)
-                if len(new_data_dict) > 0 and is_ID_stepped:
-                    # Update the latest data dictionary
-                    latest_data_dict.update(new_data_dict)
-
-                    # Calculate values (watts, accumulated power, etc.)
-                    try:
-                        latest_data_dict["battery_volts"] = latest_data_dict["raw_battery_volts"]
-                        latest_data_dict["battery_ampere"] = latest_data_dict["raw_battery_ampere"]
-                        latest_data_dict["solar_total_volts"] = latest_data_dict["raw_solar_total_volts"]
-                        latest_data_dict["solar_total_ampere"] = latest_data_dict["raw_solar_total_ampere"]
-                        latest_data_dict["solar_1_ampere"] = latest_data_dict["raw_solar_1_ampere"]
-                        latest_data_dict["solar_2_ampere"] = latest_data_dict["raw_solar_2_ampere"]
-                        latest_data_dict["solar_3_ampere"] = latest_data_dict["raw_solar_3_ampere"]
-                        latest_data_dict["solar_4_ampere"] = latest_data_dict["raw_solar_4_ampere"]
-                        latest_data_dict["solar_5_ampere"] = latest_data_dict["raw_solar_5_ampere"]
-                        latest_data_dict["body_speed"] = latest_data_dict["raw_body_speed"]
-                        # latest_data_dict["battery_temperature_R"] = latest_data_dict["raw_battery_temperature_R"]
-                        # latest_data_dict["battery_temperature_L"] = latest_data_dict["raw_battery_temperature_L"]
-                        latest_data_dict["ID"] = latest_data_dict["raw_ID"]
-                        latest_data_dict["body_speed"] = latest_data_dict["body_speed"] / TIRE_PULSE_PER_CYCLE * TIRE_CIRCUMFERENCE_MM / 1000000 * 3600
-                        # latest_data_dict["battery_temperature_R"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_R"] / (1024 - latest_data_dict["battery_temperature_R"]), 10) / 3435) - KELVIN
-                        # latest_data_dict["battery_temperature_L"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_L"] / (1024 - latest_data_dict["battery_temperature_L"]), 10) / 3435) - KELVIN
-                        # latest_data_dict["motor_ampere"] *= 3.33 / 1000
-                        # latest_data_dict["motor_volts"] *= 1.25 * 4 / 1000
-                        latest_data_dict["battery_ampere"] *= 3.33 / 1000
-                        latest_data_dict["battery_volts"] *= 1.25 * 4 / 1000
-                        latest_data_dict["solar_total_ampere"] *= 3.33 / 1000
-                        latest_data_dict["solar_total_volts"] *= 1.25 * 4 / 1000
-                        # latest_data_dict["motor_watts"] = latest_data_dict["motor_ampere"] * latest_data_dict["motor_volts"]
-                        latest_data_dict["solar_total_watts"] = latest_data_dict["solar_total_ampere"] * latest_data_dict["solar_total_volts"]
-                        # latest_data_dict["battery_watts"] = latest_data_dict["battery_ampere"] * latest_data_dict["battery_volts"]
-                        latest_data_dict["body_traveled_distance"] += latest_data_dict["body_speed"] * (time.time() - self.before_parsed_epoch_sec) / 3600
-                        # latest_data_dict["motor_accumulated_power"] += latest_data_dict["motor_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
-                        latest_data_dict["solar_total_accumulated_power"] += latest_data_dict["solar_total_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
-                        latest_data_dict["battery_accumulated_power"] += latest_data_dict["battery_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
-                        latest_data_dict["battery_remain_power_ah"] = INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] - latest_data_dict["battery_accumulated_power"]
-                        latest_data_dict["battery_remain_power_percent"] = latest_data_dict["battery_remain_power_ah"] / INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] * 100
-                        latest_data_dict["latitude"] = latest_data_dict["raw_latitude"]
-                        latest_data_dict["longitude"] = latest_data_dict["raw_longitude"]
-                        latest_data_dict["datetime"] = latest_data_dict["raw_datetime"]
-                        latest_data_dict["raw_SC"] = latest_data_dict["raw_SC"]
-                    except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
-                        _print(e)
-
+                            try:
+                                if INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_datetime":
+                                    new_key = dt.strptime(key, "%m/%d/%H:%M:%S")
+                                    new_key = new_key.replace(year=dt.now().year)
+                                    new_key = new_key.strftime("%y/%m/%d %H:%M:%S")
+                                    print(new_key)
+                                elif INITIAL_SETTINGS["values"]["data_sort"][i] == "raw_SC":
+                                    new_key = key
+                                else:
+                                    new_key = float(re.sub(r"[^0-9.]", "", key))
+                            except ValueError:
+                                new_key = None
+                            new_data_dict[INITIAL_SETTINGS["values"]["data_sort"][i]] = new_key
                     _print(new_data_dict)
-                    eel.Data_PY2JS(latest_data_dict)  # type: ignore
-                    _print(latest_data_dict)
 
-                    if not IS_DISABLED_BACKGROUND_LOGGING:
-                        # Log the latest data
-                        # 一時的にログファイルを生成する処理を行わせる
-                        # あとで修正する
-                        if logging_filename == "":
-                            create_new_logging_file()
+                    is_ID_stepped = True  # int(new_data_dict["ID"]) == int(latest_ID)
+                    _print(latest_ID, new_data_dict["raw_ID"], is_ID_stepped)
+                    if len(new_data_dict) > 0 and is_ID_stepped:
+                        # Update the latest data dictionary
+                        latest_data_dict.update(new_data_dict)
 
-                        with open(logging_filename, mode="a", encoding="UTF-8") as file:
-                            new_line = str(dt.now()) + "," + ",".join([str(latest_data_dict[key]) for key in sorted(latest_data_dict.keys())]) + "," + latest_timestamp + "\n"
-                            file.write(new_line)
-                            latest_timestamp = ""
-                if "ID" in new_data_dict:
-                    latest_ID = new_data_dict["ID"]
-                self.before_parsed_epoch_sec = time.time()
-                self.received_text = ""
+                        # Calculate values (watts, accumulated power, etc.)
+                        try:
+                            latest_data_dict["battery_volts"] = latest_data_dict["raw_battery_volts"]
+                            latest_data_dict["battery_ampere"] = latest_data_dict["raw_battery_ampere"]
+                            latest_data_dict["solar_total_volts"] = latest_data_dict["raw_solar_total_volts"]
+                            latest_data_dict["solar_total_ampere"] = latest_data_dict["raw_solar_total_ampere"]
+                            latest_data_dict["solar_1_ampere"] = latest_data_dict["raw_solar_1_ampere"]
+                            latest_data_dict["solar_2_ampere"] = latest_data_dict["raw_solar_2_ampere"]
+                            latest_data_dict["solar_3_ampere"] = latest_data_dict["raw_solar_3_ampere"]
+                            latest_data_dict["solar_4_ampere"] = latest_data_dict["raw_solar_4_ampere"]
+                            latest_data_dict["solar_5_ampere"] = latest_data_dict["raw_solar_5_ampere"]
+                            latest_data_dict["body_speed"] = latest_data_dict["raw_body_speed"]
+                            # latest_data_dict["battery_temperature_R"] = latest_data_dict["raw_battery_temperature_R"]
+                            # latest_data_dict["battery_temperature_L"] = latest_data_dict["raw_battery_temperature_L"]
+                            latest_data_dict["ID"] = latest_data_dict["raw_ID"]
+                            latest_data_dict["body_speed"] = latest_data_dict["body_speed"] / TIRE_PULSE_PER_CYCLE * TIRE_CIRCUMFERENCE_MM / 1000000 * 3600
+                            # latest_data_dict["battery_temperature_R"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_R"] / (1024 - latest_data_dict["battery_temperature_R"]), 10) / 3435) - KELVIN
+                            # latest_data_dict["battery_temperature_L"] = 1 / (1 / (25 + KELVIN) + math.log(latest_data_dict["battery_temperature_L"] / (1024 - latest_data_dict["battery_temperature_L"]), 10) / 3435) - KELVIN
+                            # latest_data_dict["motor_ampere"] *= 3.33 / 1000
+                            # latest_data_dict["motor_volts"] *= 1.25 * 4 / 1000
+                            latest_data_dict["battery_ampere"] *= 3.33 / 1000
+                            latest_data_dict["battery_volts"] *= 1.25 * 4 / 1000
+                            latest_data_dict["solar_total_ampere"] *= 3.33 / 1000
+                            latest_data_dict["solar_total_volts"] *= 1.25 * 4 / 1000
+                            # latest_data_dict["motor_watts"] = latest_data_dict["motor_ampere"] * latest_data_dict["motor_volts"]
+                            latest_data_dict["solar_total_watts"] = latest_data_dict["solar_total_ampere"] * latest_data_dict["solar_total_volts"]
+                            # latest_data_dict["battery_watts"] = latest_data_dict["battery_ampere"] * latest_data_dict["battery_volts"]
+                            latest_data_dict["body_traveled_distance"] += latest_data_dict["body_speed"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                            # latest_data_dict["motor_accumulated_power"] += latest_data_dict["motor_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                            latest_data_dict["solar_total_accumulated_power"] += latest_data_dict["solar_total_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                            latest_data_dict["battery_accumulated_power"] += latest_data_dict["battery_ampere"] * (time.time() - self.before_parsed_epoch_sec) / 3600
+                            latest_data_dict["battery_remain_power_ah"] = INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] - latest_data_dict["battery_accumulated_power"]
+                            latest_data_dict["battery_remain_power_percent"] = latest_data_dict["battery_remain_power_ah"] / INITIAL_SETTINGS["values"]["body"]["initial_battery_ah"] * 100
+                            latest_data_dict["latitude"] = latest_data_dict["raw_latitude"]
+                            latest_data_dict["longitude"] = latest_data_dict["raw_longitude"]
+                            latest_data_dict["datetime"] = latest_data_dict["raw_datetime"]
+                            latest_data_dict["raw_SC"] = latest_data_dict["raw_SC"]
+                        except (ZeroDivisionError, TypeError, ValueError, KeyError, AttributeError, SyntaxError) as e:
+                            _print(e)
+
+                        _print(new_data_dict)
+                        eel.Data_PY2JS(latest_data_dict)  # type: ignore
+                        _print(latest_data_dict)
+
+                        if not IS_DISABLED_BACKGROUND_LOGGING:
+                            # Log the latest data
+                            # 一時的にログファイルを生成する処理を行わせる
+                            # あとで修正する
+                            if logging_filename == "":
+                                create_new_logging_file()
+
+                            with open(logging_filename, mode="a", encoding="UTF-8") as file:
+                                new_line = str(dt.now()) + "," + ",".join([str(latest_data_dict[key]) for key in sorted(latest_data_dict.keys())]) + "," + latest_timestamp + "\n"
+                                file.write(new_line)
+                                latest_timestamp = ""
+                    if "ID" in new_data_dict:
+                        latest_ID = new_data_dict["ID"]
+                    self.before_parsed_epoch_sec = time.time()
+                    self.received_text = ""
+            except Exception as e:
+                _print("Error in connection_observer")
+                _print(e)
 
 
 @eel.expose
